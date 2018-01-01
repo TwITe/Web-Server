@@ -88,7 +88,7 @@ namespace webserver {
             content_length = response_length;
         }
 
-        void set_response_headers(const vector& http_headers) {
+        void set_response_headers(const vector<http_header>& http_headers) {
             headers = http_headers;
         }
     };
