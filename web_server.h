@@ -5,6 +5,12 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <cstring>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <thread>
 using namespace std;
 //Реализация простого веб-сервера.
 //
@@ -39,7 +45,7 @@ namespace webserver {
     //Класс, который инкапсулирует в себе http запрос: HTTP заголовки,
     //URL запроса, request-параметры, тело запроса (в случае POST запроса), тип запроса - GET, POST, PUT
     class http_request {
-    private:
+    protected:
         //заголовки HTTP запроса
         vector<http_header> headers;
 
@@ -57,7 +63,9 @@ namespace webserver {
         //Метод запроса - POST, GET, PUT, PATCH, HEADER...
         string method;
     public:
+        void Parser(const string& request) {
 
+        }
     };
 
     //Класс, который инкапсулирует в себе http ответ: HTTP заголовки,
@@ -91,6 +99,40 @@ namespace webserver {
         void set_response_headers(const vector<http_header>& http_headers) {
             headers = http_headers;
         }
+    };
+
+    class connection_handler: http_request {
+    private:
+        char read_buffer[8192];
+        ssize_t message_size;
+        int socket;
+    public:
+        connection_handler(int new_socket) : socket(new_socket) {
+            cout << "----------------------------" << endl << endl;
+            cout << "[Server] Connection accepted" << endl << endl;
+            cout << "----------------------------" << endl << endl;
+            take_request();
+        }
+
+        void take_request() {
+            while ((message_size = recv(socket, read_buffer, sizeof(read_buffer) - 1, 0)) > 0) {
+                read_buffer[message_size] = '\0';
+                cout << "[Server] Client message accepted" << endl;
+                cout << "[Server] Client message: " << read_buffer << endl;
+
+                if (write(socket, read_buffer, static_cast<size_t>(message_size)) == -1) {
+                    cout << "[Client] Message sending failed" << endl;
+                    return;
+                }
+                cout << "[Server] Message sent to client" << endl << endl;
+                cout << "============================" << endl << endl;
+                cout.flush();
+
+                memset(&read_buffer, 0, 8192);
+            }
+        }
+
+        ~connection_handler() = default;
     };
 
     //Базовый обработчик всех запросов
