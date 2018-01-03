@@ -65,15 +65,106 @@ namespace webserver {
         //Метод запроса - POST, GET, PUT, PATCH, HEADER...
         string method;
     public:
+        void set_http_request_method(const string& client_requst_method) {
+            method = client_requst_method;
+        }
 
+        void set_http_request_url(const string& client_requst_url) {
+            url = client_requst_url;
+        }
+
+        void set_http_request_body(const string& client_request_body) {
+            url = client_request_body;
+        }
+
+        void add_http_request_param(request_param& client_request_param) {
+            request_params.push_back(client_request_param);
+        }
+
+        void add_http_request_header(http_header& client_request_header) {
+            headers.push_back(client_request_header);
+        }
     };
 
     class http_request_parser {
     public:
-        static http_request parse(const string& request_message) {
+        http_request parse(vector <string>& client_message) {
             http_request request;
-            stringstream ss;
 
+            string client_host, client_url_second_pair, client_full_url;
+            for (auto field: client_message) {
+
+                string current_header_type;
+
+                int it;
+                for (it = 0; field[it] != ':' || field[it] != ' '; it++) {
+                    current_header_type.push_back(field[it]);
+                }
+
+                if (current_header_type == "GET") {
+                    request.set_http_request_method("GET");
+                    client_url_second_pair = field.substr(it + 1);
+                }
+
+                if (current_header_type == "POST") {
+                    request.set_http_request_method("POST");
+                    client_url_second_pair = field.substr(it + 1);
+                }
+
+                if (current_header_type == "Host") {
+                    client_host = field.substr(it + 1);
+                }
+
+                if (current_header_type == "Content-Type") {
+                    request.set_http_request_body(field.substr(it+1));
+                }
+
+                else {
+                    http_header current_header;
+                    current_header.type = current_header_type;
+                    current_header.value = field.substr(it + 1);
+
+                    request.add_http_request_header(current_header);
+                }
+            }
+
+            client_full_url = client_host + client_url_second_pair;
+            request.set_http_request_url(client_full_url);
+
+            size_t it = client_full_url.find('?');
+            if (it != string::npos) {
+                request_param current_param;
+                string param_name, param_value;
+
+                bool param_name_apeeared = false;
+                for (it; it < client_full_url.size(); it++) {
+                    if (!param_name_apeeared) {
+                        if (client_full_url[it] != '=') {
+                            param_name.push_back(client_full_url[it]);
+                        }
+                        else {
+                            param_name_apeeared = true;
+                            continue;
+                        }
+                    }
+                    else {
+                        if (client_full_url[it] != '&') {
+                            param_value.push_back(client_full_url[it]);
+                        }
+                        if (client_full_url[it] == '&' || it + 1 == client_full_url.size()) {
+                            param_name_apeeared = false;
+
+                            current_param.name = param_name;
+                            current_param.value = param_value;
+
+                            request.add_http_request_param(current_param);
+
+                            param_name.clear();
+                            param_value.clear();
+                        }
+                    }
+                }
+            }
             return request;
         }
     };
@@ -114,10 +205,15 @@ namespace webserver {
     class connection_handler {
     private:
         int socket;
+
         http_request request;
+
         http_response response;
+
+        function<vector <string>(char*)> convert_client_message;
     public:
-        connection_handler(int new_socket) : socket(new_socket) {
+        connection_handler(int new_socket, function<vector <string>(char*)> convert_client_message) : socket(new_socket),
+        convert_client_message(convert_client_message) {
             cout << "----------------------------" << endl << endl;
             cout << "[Server] Connection accepted" << endl << endl;
             cout << "----------------------------" << endl << endl;
@@ -125,31 +221,26 @@ namespace webserver {
             handle_client();
         }
 
-        void handle_message(string client_message) {
+        ~connection_handler() = default;
 
+    private:
+        void handle_message(vector <string> client_message) {
+            http_request_parser parser;
+            http_request request = parser.parse(client_message);
         }
 
         void handle_client() {
-            ssize_t message_size;
             char read_buffer[256000];
-            while ((message_size = recv(socket, read_buffer, sizeof(read_buffer), 0)) > 0) {
+            while ((recv(socket, read_buffer, sizeof(read_buffer), 0)) > 0) {
                 cout << "[Server] Client message accepted" << endl;
                 cout << "[Server] Client message: " << read_buffer << endl;
                 cout.flush();
 
-                handle_message(convert_client_message_char_buffer_to_string(read_buffer));
+                handle_message(convert_client_message(read_buffer));
 
                 memset(&read_buffer, 0, sizeof(read_buffer));
             }
         };
-
-        string convert_client_message_char_buffer_to_string(char request_char_buffer[]) {
-            string request(request_char_buffer);
-
-            return request;
-        }
-
-        ~connection_handler() = default;
     };
 
     //Базовый обработчик всех запросов
@@ -166,7 +257,7 @@ namespace webserver {
         //Функция задаётся пользователем, но web-server обязан корректно инициализировать http_reqeust.
         function<http_response(http_request)> handler;
     public:
-        web_handler(string pattern, string method, function<http_response(http_request)>) :
+        web_handler(string pattern, string method, function<http_response(http_request)> handler) :
                 pattern{pattern}, method{method}, handler{handler} {}
     };
 
@@ -179,8 +270,12 @@ namespace webserver {
         struct sockaddr_in server_address{};
 
         socklen_t client_len;
+
+        function<vector <string>(char*)> convert_client_message;
+
     public:
-        tcp_server(unsigned short int PORT) : PORT(PORT) {};
+        tcp_server(unsigned short int PORT, function<vector <string>(char*)> convert_client_message) : PORT(PORT),
+        convert_client_message(convert_client_message) {};
 
         void activate_tcp_server() {
             memset(&server_address, 0, sizeof(server_address));
@@ -209,8 +304,7 @@ namespace webserver {
 
             take_requests();
         }
-
-
+    private:
         void take_requests() {
             for (int i = 0; i > 0; i++) {
                 int client_socket = accept(listener_socket, (struct sockaddr*) &server_address, &client_len);
@@ -218,32 +312,46 @@ namespace webserver {
                 cout << "[Server] Connection accepted" << endl << endl;
                 cout << "----------------------------" << endl << endl;
 
-                thread handling_thread(connection_handler::connection_handler(client_socket));
+                connection_handler current_connection_handler(client_socket, convert_client_message);
+                thread handling_thread(current_connection_handler);
                 handling_thread.detach();
             }
         }
     };
 
-    //Главный класс веб-сервера
     class web_server {
     private:
-        //Порт, на котором требуется принимать соединения
         const unsigned short int PORT;
 
-        //Действия, которые нужно выполнять при приёме соединения
         vector<web_handler> handlers;
 
     public:
         web_server(unsigned short int port, vector<web_handler> handlers) :
                 PORT(port), handlers(handlers) {};
 
+        function<vector <string>(char*)> convert_client_message = [&](char* request_char_buffer) {
+            string converted_client_message(request_char_buffer);
+
+            vector <string> message_fields;
+
+            string buffer;
+            for (auto it = converted_client_message.begin(); it != converted_client_message.end(); it++) {
+                if (*it != '\n' || it != converted_client_message.end()) {
+                    buffer.push_back(*it);
+                }
+                else {
+                    message_fields.push_back(buffer);
+                    buffer.clear();
+                }
+            }
+            return message_fields;
+        };
+
         //Запуск web-server.
         //Функция должна блокировать поток, в котором она была запущена, чтобы веб-сервер не прекращал работу мгновенно.
         void start() {
-            tcp_server server(PORT);
+            tcp_server server(PORT, convert_client_message);
             server.activate_tcp_server();
-
-
         };
 
         void stop() {
