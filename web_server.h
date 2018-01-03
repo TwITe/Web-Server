@@ -68,9 +68,10 @@ namespace webserver {
 
     };
 
-    class request_parser {
+    class http_request_parser {
     public:
-        static http_request parser(const string& request_message, http_request &request) {
+        static http_request parse(const string& request_message) {
+            http_request request;
             stringstream ss;
 
             return request;
@@ -110,10 +111,8 @@ namespace webserver {
         }
     };
 
-    class connection_handler: http_request, http_response {
+    class connection_handler {
     private:
-        char request_buffer[];
-        ssize_t message_size;
         int socket;
         http_request request;
         http_response response;
@@ -122,31 +121,29 @@ namespace webserver {
             cout << "----------------------------" << endl << endl;
             cout << "[Server] Connection accepted" << endl << endl;
             cout << "----------------------------" << endl << endl;
+
             handle_client();
         }
 
+        void handle_message(string client_message) {
+
+        }
+
         void handle_client() {
-            request_buffer = take_request();
-            string request_message = convert_request_char_buffer_to_string(request_buffer);
-            request_parser::parser(request_message, request);
-
-            
-        };
-
-        char take_request[]() {
-            char read_buffer[8192];
-            if ((message_size = recv(socket, read_buffer, sizeof(read_buffer) - 1, 0)) > 0) {
-                read_buffer[message_size] = '\0';
+            ssize_t message_size;
+            char read_buffer[256000];
+            while ((message_size = recv(socket, read_buffer, sizeof(read_buffer), 0)) > 0) {
                 cout << "[Server] Client message accepted" << endl;
                 cout << "[Server] Client message: " << read_buffer << endl;
                 cout.flush();
 
-                memset(&read_buffer, 0, 8192);
-            }
-            return read_buffer;
-        }
+                handle_message(convert_client_message_char_buffer_to_string(read_buffer));
 
-        string convert_request_char_buffer_to_string(char request_char_buffer[]) {
+                memset(&read_buffer, 0, sizeof(read_buffer));
+            }
+        };
+
+        string convert_client_message_char_buffer_to_string(char request_char_buffer[]) {
             string request(request_char_buffer);
 
             return request;
@@ -173,6 +170,60 @@ namespace webserver {
                 pattern{pattern}, method{method}, handler{handler} {}
     };
 
+    class tcp_server {
+    private:
+        unsigned short int PORT;
+
+        int listener_socket;
+
+        struct sockaddr_in server_address{};
+
+        socklen_t client_len;
+    public:
+        tcp_server(unsigned short int PORT) : PORT(PORT) {};
+
+        void activate_tcp_server() {
+            memset(&server_address, 0, sizeof(server_address));
+
+            listener_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+            server_address.sin_family = AF_INET;
+            server_address.sin_port = htons(PORT);
+            if (inet_aton("127.0.0.1", &server_address.sin_addr) == 0) {
+                cout << "[Server] Invalid IP address" << endl;
+                return;
+            }
+
+            if (bind(listener_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
+                cout << "[Server] Binding failed" << endl;
+                return;
+            }
+
+            if (listen(listener_socket, 100) == -1) {
+                cout << "[Server] Listening failed" << endl;
+                return;
+            }
+
+            cout << "[Server] All setting are done" << endl;
+            cout << "[Server] Server enabled" << endl;
+
+            take_requests();
+        }
+
+
+        void take_requests() {
+            for (int i = 0; i > 0; i++) {
+                int client_socket = accept(listener_socket, (struct sockaddr*) &server_address, &client_len);
+                cout << "----------------------------" << endl << endl;
+                cout << "[Server] Connection accepted" << endl << endl;
+                cout << "----------------------------" << endl << endl;
+
+                thread handling_thread(connection_handler::connection_handler(client_socket));
+                handling_thread.detach();
+            }
+        }
+    };
+
     //Главный класс веб-сервера
     class web_server {
     private:
@@ -182,63 +233,23 @@ namespace webserver {
         //Действия, которые нужно выполнять при приёме соединения
         vector<web_handler> handlers;
 
-        int client_socket, listener_socket;
-
-        struct sockaddr_in server_address{};
-
-        socklen_t client_len;
     public:
         web_server(unsigned short int port, vector<web_handler> handlers) :
-                PORT{port}, handlers{handlers} {};
+                PORT(port), handlers(handlers) {};
 
         //Запуск web-server.
         //Функция должна блокировать поток, в котором она была запущена, чтобы веб-сервер не прекращал работу мгновенно.
         void start() {
-            if(!initialize_server()) {
-                cout << "Server initalizing failed" << endl;
-            }
+            tcp_server server(PORT);
+            server.activate_tcp_server();
 
-            for (int i = 0; i < 2; i++) {
-                client_socket = accept(listener_socket, (struct sockaddr*) &server_address, &client_len);
-                cout << "----------------------------" << endl << endl;
-                cout << "[Server] Connection accepted" << endl << endl;
-                cout << "----------------------------" << endl << endl;
 
-                thread handling_thread(connection_handler::connection_handler(client_socket));
-                handling_thread.detach();
-            }
         };
-
-        bool initialize_server() {
-            memset(&server_address, 0, sizeof(server_address));
-
-            listener_socket = socket(AF_INET, SOCK_STREAM, 0);
-
-            server_address.sin_family = AF_INET;
-            server_address.sin_port = htons(PORT);
-            if (inet_aton("127.0.0.1", &server_address.sin_addr) == 0) {
-                cout << "[Server] Invalid IP address" << endl;
-                return false;
-            }
-
-            if (bind(listener_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
-                cout << "[Server] Binding failed" << endl;
-                return false;
-            }
-
-            if (listen(listener_socket, 100) == -1) {
-                cout << "[Server] Listening failed" << endl;
-                return false;
-            }
-
-            cout << "[Server] All setting are done" << endl;
-            cout << "[Server] Server enabled" << endl;
-
-            return true;
-        }
 
         void stop() {
             return;
         }
     };
+
+
 }
