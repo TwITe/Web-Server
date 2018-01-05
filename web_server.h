@@ -115,69 +115,6 @@ namespace webserver {
             //TODO: Написать тесты для парсера
             //TODO: Написать алгоритм обработки хэдеров
 
-            for (auto field: request_message) {
-
-                string current_header_type;
-
-                int it;
-                for (it = 0; field[it] != ':' || field[it] != ' '; it++) {
-                    current_header_type.push_back(field[it]);
-                }
-
-                if (current_header_type == "Host") {
-                    client_host = field.substr(it + 1);
-                }
-
-                if (current_header_type == "Content-Type") {
-                    request.set_http_request_body(field.substr(it+1));
-                }
-
-                else {
-                    http_header current_header;
-                    current_header.type = current_header_type;
-                    current_header.value = field.substr(it + 1);
-
-                    request.add_http_request_header(current_header);
-                }
-            }
-
-            client_full_url = client_host + client_url_second_pair;
-            request.set_http_request_url(client_full_url);
-
-            size_t it = client_full_url.find('?');
-            if (it != string::npos) {
-                request_param current_param;
-                string param_name, param_value;
-
-                bool param_name_apeeared = false;
-                for (it; it < client_full_url.size(); it++) {
-                    if (!param_name_apeeared) {
-                        if (client_full_url[it] != '=') {
-                            param_name.push_back(client_full_url[it]);
-                        }
-                        else {
-                            param_name_apeeared = true;
-                            continue;
-                        }
-                    }
-                    else {
-                        if (client_full_url[it] != '&') {
-                            param_value.push_back(client_full_url[it]);
-                        }
-                        if (client_full_url[it] == '&' || it + 1 == client_full_url.size()) {
-                            param_name_apeeared = false;
-
-                            current_param.name = param_name;
-                            current_param.value = param_value;
-
-                            request.add_http_request_param(current_param);
-
-                            param_name.clear();
-                            param_value.clear();
-                        }
-                    }
-                }
-            }
             return request;
         }
     };
