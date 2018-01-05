@@ -102,7 +102,7 @@ namespace webserver {
             request.set_http_request_url(request_url);
         }
 
-        string get_request_url() {
+        string get_full_request_url() {
 
         }
     public:
