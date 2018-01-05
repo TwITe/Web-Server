@@ -87,12 +87,12 @@ namespace webserver {
     };
 
     class http_request_parser {
-        vector<string> request_message;
+        vector<string> socket_message;
     public:
-        http_request_parser(vector<string>& request_message) : request_message(request_message) {};
+        http_request_parser(vector<string>& received_socket_message) : socket_message(received_socket_message) {};
     private:
-        string parse_request_line(http_request& request) {
-            istringstream request_line(request_message[0]);
+        bool parse_request_line(http_request& request) {
+            istringstream request_line(socket_message[0]);
             string method;
             string request_url;
 
@@ -105,11 +105,16 @@ namespace webserver {
         string get_full_request_url() {
 
         }
+
+        bool parse_headers(http_request& request) {
+
+        }
     public:
         http_request parse() {
             http_request request;
 
             parse_request_line(request);
+            parse_headers(request);
 
             //TODO: Написать функцию добавления хоста (header "Host" к текущему url)
             //TODO: Написать тесты для парсера
