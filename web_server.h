@@ -102,12 +102,29 @@ namespace webserver {
             request.set_http_request_url(request_url);
         }
 
-        string get_full_request_url() {
+        string extend_request_url_by_host(const string& host) {
 
         }
 
-        bool parse_headers(http_request& request) {
+        bool check_is_current_header_host(const string& current_header) {
+            return current_header == "Host";
+        }
 
+        bool parse_headers(http_request& request) {
+             for (auto current_message_line = socket_message.begin() + 1; current_message_line != socket_message.end(); current_message_line++) {
+                 string current_header_type;
+                 string current_header_value;
+                 for (size_t current_char_postion = 0; current_char_postion < current_message_line->size(); current_char_postion++) {
+                     if ((*current_message_line)[current_char_postion] == ' ') {
+                         current_header_value = current_message_line->substr(current_char_postion + 1);
+                         break;
+                     }
+                     current_header_type.push_back((*current_message_line)[current_char_postion]);
+                 }
+                 if (check_is_current_header_host) {
+                     extend_request_url_by_host(current_header_value);
+                 }
+            }
         }
     public:
         http_request parse() {
