@@ -74,7 +74,7 @@ namespace webserver {
         }
 
         void set_http_request_body(const string& client_request_body) {
-            url = client_request_body;
+            request_body = client_request_body;
         }
 
         void add_http_request_param(request_param& client_request_param) {
@@ -84,6 +84,10 @@ namespace webserver {
         void add_http_request_header(http_header& client_request_header) {
             headers.push_back(client_request_header);
         }
+
+        string get_url_second_part_for_extending_url_function() {
+            return url;
+        }
     };
 
     class http_request_parser {
@@ -91,7 +95,7 @@ namespace webserver {
     public:
         http_request_parser(vector<string>& received_socket_message) : socket_message(received_socket_message) {};
     private:
-        bool parse_request_line(http_request& request) {
+        void parse_request_line(http_request& request) {
             istringstream request_line(socket_message[0]);
             string method;
             string request_url;
@@ -102,12 +106,19 @@ namespace webserver {
             request.set_http_request_url(request_url);
         }
 
-        string extend_request_url_by_host(const string& host) {
-
+        void extend_request_url_by_host(const string& host, http_request& request) {
+            string full_url;
+            string url_second_part = request.get_url_second_part_for_extending_url_function();
+            full_url = host + url_second_part;
+            request.set_http_request_url(full_url);
         }
 
         bool check_is_current_header_host(const string& current_header) {
             return current_header == "Host";
+        }
+
+        bool check_is_current_header_request_body(const string& current_header) {
+            return current_header == "Content-type";
         }
 
         bool parse_headers(http_request& request) {
@@ -121,21 +132,27 @@ namespace webserver {
                      }
                      current_header_type.push_back((*current_message_line)[current_char_postion]);
                  }
-                 if (check_is_current_header_host) {
-                     extend_request_url_by_host(current_header_value);
+                 if (check_is_current_header_host(current_header_type)) {
+                     extend_request_url_by_host(current_header_value, request);
+                 }
+                 if (check_is_current_header_request_body(current_header_type)) {
+                     request.set_http_request_body(current_header_value);
+                 }
+                 else {
+                     http_header current_header;
+                     current_header.type = current_header_type;
+                     current_header.value = current_header_value;
+                     request.add_http_request_header(current_header);
                  }
             }
         }
     public:
+        //TODO: Написать тесты для парсера
         http_request parse() {
             http_request request;
 
             parse_request_line(request);
             parse_headers(request);
-
-            //TODO: Написать функцию добавления хоста (header "Host" к текущему url)
-            //TODO: Написать тесты для парсера
-            //TODO: Написать алгоритм обработки хэдеров
 
             return request;
         }
