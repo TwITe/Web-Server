@@ -214,8 +214,8 @@ namespace webserver {
 
     private:
         void handle_message(vector <string> client_message) {
-            http_request_parser parser;
-            http_request request = parser.parse(client_message);
+            http_request_parser parser(client_message);
+            http_request request = parser.parse();
         }
 
         void handle_client() {
