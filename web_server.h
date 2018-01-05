@@ -64,8 +64,6 @@ namespace webserver {
 
         //Метод запроса - POST, GET, PUT, PATCH, HEADER...
         string method;
-
-        string http_version;
     public:
         void set_http_request_method(const string& client_requst_method) {
             method = client_requst_method;
@@ -73,10 +71,6 @@ namespace webserver {
 
         void set_http_request_url(const string& client_requst_url) {
             url = client_requst_url;
-        }
-
-        void set_http_request_http_version(const string& client_http_version) {
-            http_version = client_http_version;
         }
 
         void set_http_request_body(const string& client_request_body) {
@@ -97,23 +91,15 @@ namespace webserver {
     public:
         http_request_parser(vector<string>& request_message) : request_message(request_message) {};
     private:
-        string separate_http_version(const string& http_version) {
-            return http_version.substr(5);
-        }
-
         string parse_request_line(http_request& request) {
             istringstream request_line(request_message[0]);
             string method;
             string request_url;
-            string http_version;
 
-            request_line >> method >> request_url >> http_version;
-
-            http_version = separate_http_version(http_version);
+            request_line >> method >> request_url;
 
             request.set_http_request_method(method);
             request.set_http_request_url(request_url);
-            request.set_http_request_http_version(http_version);
         }
 
         string get_request_url() {
