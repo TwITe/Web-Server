@@ -85,10 +85,6 @@ namespace webserver {
             headers.push_back(client_request_header);
         }
 
-        string get_url_second_part_for_extending_url_function() {
-            return url;
-        }
-
         const vector<http_header>& getHeaders() const {
             return headers;
         }
@@ -108,15 +104,26 @@ namespace webserver {
         const string& get_request_method() const {
             return method;
         }
+
+        bool check_is_request_body_exist() {
+            for (auto const& current_header: headers) {
+                if (current_header.type == "Content-type") {
+                    return true;
+                }
+            }
+            return false;
+        }
     };
 
     class http_request_parser {
-        vector<string> socket_message;
-    public:
-        http_request_parser(vector<string>& received_socket_message) : socket_message(received_socket_message) {};
     private:
-        void parse_request_line(http_request& request) {
-            istringstream request_line(socket_message[0]);
+        bool check_is_current_header_host(const string& current_header) {
+            return current_header == "Host";
+        }
+
+        void parse_request_line(http_request& request, const vector<string>& raw_http_request) {
+            istringstream request_line(raw_http_request[0]);
+
             string method;
             string request_url;
 
@@ -128,23 +135,30 @@ namespace webserver {
 
         void extend_request_url_by_host(const string& host, http_request& request) {
             string full_url;
-            string url_second_part = request.get_url_second_part_for_extending_url_function();
+            string url_second_part = request.get_request_url();
+
             full_url = host + url_second_part;
+
             request.set_http_request_url(full_url);
         }
 
-        bool check_is_current_header_host(const string& current_header) {
-            return current_header == "Host";
+        void parse_request_body(http_request& request, const vector<string>& raw_http_request) {
+            for (auto current_message_line = raw_http_request.begin(); current_message_line != raw_http_request.end(); current_message_line++)  {
+                if (*current_message_line == " ") {
+                    request.set_http_request_body(*(current_message_line + 1));
+                }
+            }
         }
 
-        bool check_is_current_header_request_body(const string& current_header) {
-            return current_header == "Content-type";
-        }
-
-        bool parse_headers(http_request& request) {
-             for (auto current_message_line = socket_message.begin() + 1; current_message_line != socket_message.end(); current_message_line++) {
+        void parse_headers(http_request& request, const vector<string>& raw_http_request) {
+             for (auto current_message_line = raw_http_request.begin() + 1; current_message_line != raw_http_request.end(); current_message_line++) {
                  string current_header_type;
                  string current_header_value;
+
+                 if (*current_message_line == " ") {
+                     break;
+                 }
+
                  for (size_t current_char_postion = 0; current_char_postion < current_message_line->size(); current_char_postion++) {
                      if ((*current_message_line)[current_char_postion] == ' ') {
                          current_header_value = current_message_line->substr(current_char_postion + 1);
@@ -152,27 +166,28 @@ namespace webserver {
                      }
                      current_header_type.push_back((*current_message_line)[current_char_postion]);
                  }
+
+                 http_header current_header;
+                 current_header.type = current_header_type;
+                 current_header.value = current_header_value;
+
+                 request.add_http_request_header(current_header);
+
                  if (check_is_current_header_host(current_header_type)) {
                      extend_request_url_by_host(current_header_value, request);
                  }
-                 if (check_is_current_header_request_body(current_header_type)) {
-                     request.set_http_request_body(current_header_value);
-                 }
-                 else {
-                     http_header current_header;
-                     current_header.type = current_header_type;
-                     current_header.value = current_header_value;
-                     request.add_http_request_header(current_header);
-                 }
-            }
+             }
         }
     public:
         //TODO: Написать тесты для парсера
-        http_request parse() {
+        http_request parse(vector<string>& raw_http_request) {
             http_request request;
 
-            parse_request_line(request);
-            parse_headers(request);
+            parse_request_line(request, raw_http_request);
+            parse_headers(request, raw_http_request);
+            if (request.check_is_request_body_exist()) {
+                parse_request_body(request, raw_http_request);
+            }
 
             return request;
         }
@@ -286,7 +301,7 @@ namespace webserver {
         tcp_server(unsigned short int PORT, function<vector <string>(char*)> convert_client_message) : PORT(PORT),
         convert_client_message(convert_client_message) {};
 
-        void activate_tcp_server() {
+        bool start() {
             memset(&server_address, 0, sizeof(server_address));
 
             listener_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -295,17 +310,17 @@ namespace webserver {
             server_address.sin_port = htons(PORT);
             if (inet_aton("127.0.0.1", &server_address.sin_addr) == 0) {
                 cout << "[Server] Invalid IP address" << endl;
-                return;
+                return false;
             }
 
             if (bind(listener_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
                 cout << "[Server] Binding failed" << endl;
-                return;
+                return false;
             }
 
             if (listen(listener_socket, 100) == -1) {
                 cout << "[Server] Listening failed" << endl;
-                return;
+                return false;
             }
 
             cout << "[Server] All setting are done" << endl;
@@ -332,8 +347,7 @@ namespace webserver {
     private:
         const unsigned short int PORT;
 
-        vector<web_handler> handlers;
-
+        vector<web_handler> handlers; // обработчики
     public:
         web_server(unsigned short int port, vector<web_handler> handlers) :
                 PORT(port), handlers(handlers) {};
@@ -360,13 +374,13 @@ namespace webserver {
         //Функция должна блокировать поток, в котором она была запущена, чтобы веб-сервер не прекращал работу мгновенно.
         void start() {
             tcp_server server(PORT, convert_client_message);
-            server.activate_tcp_server();
+            if (!server.start()) {
+                throw runtime_error("Failed to start TCP Server");
+            }
         };
 
         void stop() {
             return;
         }
     };
-
-
 }
