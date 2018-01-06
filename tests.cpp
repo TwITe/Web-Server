@@ -4,7 +4,7 @@
 using namespace std;
 
 TEST_CASE("Parser request line function works well", "[Parser]") {
-    vector <string> request_line;
+    vector<string> request_line;
     request_line.push_back("GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1");
     webserver::http_request request;
     request.set_http_request_method("GET");

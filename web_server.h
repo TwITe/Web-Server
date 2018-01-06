@@ -88,6 +88,26 @@ namespace webserver {
         string get_url_second_part_for_extending_url_function() {
             return url;
         }
+
+        const vector<http_header>& getHeaders() const {
+            return headers;
+        }
+
+        const vector<request_param> get_request_params() const {
+            return request_params;
+        }
+
+        const string& get_request_body() const {
+            return request_body;
+        }
+
+        const string& get_request_url() const {
+            return url;
+        }
+
+        const string& get_request_method() const {
+            return method;
+        }
     };
 
     class http_request_parser {
