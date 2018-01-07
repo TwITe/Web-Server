@@ -4,7 +4,7 @@
 
 using namespace std;
 
-TEST_CASE("Parser works well (case 1)", "Parser") {
+TEST_CASE("Parser case 1: parse headers", "Parser") {
     vector<string> message_for_parse;
 
     message_for_parse.emplace_back("GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1");
@@ -44,13 +44,12 @@ TEST_CASE("Parser works well (case 1)", "Parser") {
     REQUIRE(proper_request.get_request_url() == received_request.get_request_url());
 }
 
-TEST_CASE("Parser works well (case 2)", "Parser") {
+TEST_CASE("Parser case 2: parse request body", "Parser") {
     vector<string> message_for_parse;
 
     message_for_parse.emplace_back("GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1");
     message_for_parse.emplace_back("Host: net.tutsplus.com");
-    message_for_parse.emplace_back("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)");
-    message_for_parse.emplace_back("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+    message_for_parse.emplace_back("Content-type: utf-8");
     message_for_parse.emplace_back(" ");
     message_for_parse.emplace_back(R"_(<?xml version="1.0" encoding="utf-8"?>)_");
 
@@ -62,11 +61,8 @@ TEST_CASE("Parser works well (case 2)", "Parser") {
     header.type = "Host";
     header.value = "net.tutsplus.com";
     proper_request.add_http_request_header(header);
-    header.type = "User-Agent";
-    header.value = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)";
-    proper_request.add_http_request_header(header);
-    header.type = "Accept";
-    header.value = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+    header.type = "Content-type";
+    header.value = "utf-8";
     proper_request.add_http_request_header(header);
     proper_request.set_http_request_body(R"(<?xml version="1.0" encoding="utf-8"?>)");
 

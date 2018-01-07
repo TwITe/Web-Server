@@ -134,10 +134,6 @@ namespace webserver {
                 extend_request_url_by_host(current_header_value, request);
             }
         }
-
-        if (request.check_is_content_type_header_exists()) {
-            add_content_type_default_header(request);
-        }
     }
 
     http_request http_request_parser::parse(vector<string>& raw_http_request) {
@@ -148,6 +144,9 @@ namespace webserver {
         parse_headers(request, raw_http_request);
         if (request.check_is_content_type_header_exists()) {
             parse_request_body(request, raw_http_request);
+        }
+        else {
+            add_content_type_default_header(request);
         }
 
         return request;
