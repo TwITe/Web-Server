@@ -12,9 +12,7 @@
 #include <iostream>
 #include <thread>
 #include <stdexcept>
-#include "http_request_parser.h"
-#include "http_request.h"
-#include "client_http_request_handler.h"
+//#include "client_http_request_handler.h"
 using namespace std;
 
 namespace webserver {
@@ -22,11 +20,11 @@ namespace webserver {
     private:
         unsigned short int PORT;
 
-        int listener_socket;
-
-        struct sockaddr_in server_address{};
-
-        socklen_t socket_length;
+//        int listener_socket;
+//
+//        struct sockaddr_in server_address{};
+//
+//        socklen_t socket_length;
 
         function<vector<string>(char*)> convert_client_message;
     public:
