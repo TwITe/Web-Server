@@ -14,7 +14,7 @@ namespace webserver {
 
         void parse_parameters(const string& request_parameters, http_request& request);
 
-        void parse_url(http_request& request);
+        void parse_url_to_parameters(http_request& request);
 
         void extend_request_url_by_host(const string& host, http_request& request);
 

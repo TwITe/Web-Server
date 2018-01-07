@@ -70,7 +70,7 @@ namespace webserver {
         }
     }
 
-    void http_request_parser::parse_url(http_request& request) {
+    void http_request_parser::parse_url_to_parameters(http_request& request) {
         string url = request.get_request_url();
 
         if (check_is_request_parameters_exists(url)) {
@@ -144,7 +144,7 @@ namespace webserver {
         http_request request;
 
         parse_request_line(request, raw_http_request);
-        parse_url(request);
+        parse_url_to_parameters(request);
         parse_headers(request, raw_http_request);
         if (request.check_is_content_type_header_exists()) {
             parse_request_body(request, raw_http_request);
