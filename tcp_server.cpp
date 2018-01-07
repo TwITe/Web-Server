@@ -1,6 +1,5 @@
 #include "tcp_server.h"
 
-
 namespace webserver {
     tcp_server::tcp_server(unsigned short int PORT, function<vector<string>(char*)> convert_client_message) : PORT(PORT), convert_client_message(convert_client_message) {}
 
@@ -23,16 +22,10 @@ namespace webserver {
             throw runtime_error("[Server] Listening failed");
         }
 
-        cout << "[Server] All setting are done" << endl;
+        cout << "[Server] Configuring done" << endl;
         cout << "[Server] Server enabled" << endl;
 
         take_requests();
-    }
-
-    void tcp_server::handle_client_http_request(vector<string> client_message) {
-        http_request_parser parser;
-
-        http_request request = parser.parse(client_message);
     }
 
     void tcp_server::handle_client(int socket) {
@@ -43,7 +36,8 @@ namespace webserver {
             cout << "[Server] Client message accepted" << endl;
             cout << "[Server] Client message: " << read_buffer << endl;
 
-            handle_client_http_request(convert_client_message(read_buffer));
+            client_http_request_handler http_request_handler;
+            http_request_handler.handle_client_http_request(convert_client_message(read_buffer));
 
             memset(&read_buffer, 0, sizeof(read_buffer));
         }

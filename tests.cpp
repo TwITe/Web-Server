@@ -4,7 +4,7 @@
 
 using namespace std;
 
-TEST_CASE("Parser works well (case 1)", "[Parser]") {
+TEST_CASE("Parser works well (case 1)") {
     vector<string> message_for_parse;
 
     message_for_parse.emplace_back("GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1");
@@ -42,4 +42,8 @@ TEST_CASE("Parser works well (case 1)", "[Parser]") {
 
     REQUIRE(proper_request.get_request_method() == received_request.get_request_method());
     REQUIRE(proper_request.get_request_url() == received_request.get_request_url());
+}
+
+TEST_CASE("Convert client message function works well") {
+
 }

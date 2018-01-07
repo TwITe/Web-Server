@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include "http_request_parser.h"
 #include "http_request.h"
+#include "client_http_request_handler.h"
 using namespace std;
 
 namespace webserver {
@@ -34,8 +35,6 @@ namespace webserver {
         void start();
 
     private:
-        void handle_client_http_request(vector<string> client_message);
-
         void handle_client(int socket);
 
         void connection_handler(int client_socket);
