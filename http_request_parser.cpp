@@ -39,7 +39,7 @@ namespace webserver {
         string parameter_name;
         string parameter_value;
 
-        for (int current_char_position = 0; current_char_position < request_parameters.size(); current_char_position++) {
+        for (unsigned long current_char_position = 0; current_char_position < request_parameters.size(); current_char_position++) {
             if (request_parameters[current_char_position] == '&' || current_char_position == request_parameters.size() - 1) {
                 parameter_name_appeared = true;
 

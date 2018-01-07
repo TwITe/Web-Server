@@ -52,6 +52,7 @@ TEST_CASE("Parser works well (case 2)", "Parser") {
     message_for_parse.emplace_back("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)");
     message_for_parse.emplace_back("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
     message_for_parse.emplace_back(" ");
+    message_for_parse.emplace_back(R"_(<?xml version="1.0" encoding="utf-8"?>)_");
 
     webserver::http_request proper_request;
 
@@ -67,7 +68,7 @@ TEST_CASE("Parser works well (case 2)", "Parser") {
     header.type = "Accept";
     header.value = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
     proper_request.add_http_request_header(header);
-    proper_request.set_http_request_body("");
+    proper_request.set_http_request_body(R"(<?xml version="1.0" encoding="utf-8"?>)");
 
     webserver::http_request received_request;
 
@@ -84,9 +85,5 @@ TEST_CASE("Parser works well (case 2)", "Parser") {
 
     REQUIRE(proper_request.get_request_method() == received_request.get_request_method());
     REQUIRE(proper_request.get_request_url() == received_request.get_request_url());
-}
-
-
-TEST_CASE("Convert client message function works well", "Convert client message") {
-
+    REQUIRE(proper_request.get_request_body() == received_request.get_request_body());
 }
