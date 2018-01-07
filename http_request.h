@@ -1,11 +1,10 @@
-//
-// Created by twite on 07.01.18.
-//
-#pragma once
-
-#include "web_server.h"
 #ifndef WEB_HTTP_REQUEST_H
 #define WEB_HTTP_REQUEST_H
+
+#include "request_param.h"
+#include "http_header.h"
+#include <vector>
+
 namespace webserver {
     //Класс, который инкапсулирует в себе http запрос: HTTP заголовки,
     //URL запроса, request-параметры, тело запроса (в случае POST запроса), тип запроса - GET, POST, PUT
