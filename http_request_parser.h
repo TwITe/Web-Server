@@ -1,12 +1,7 @@
 #ifndef WEB_HTTP_REQUEST_PARSER_H
 #define WEB_HTTP_REQUEST_PARSER_H
-
-#include <iostream>
-#include <vector>
-#include <functional>
-#include <thread>
-#include <sstream>
 #include "http_request.h"
+#include <string>
 
 namespace webserver {
     class http_request_parser {

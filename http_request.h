@@ -1,9 +1,10 @@
 #ifndef WEB_HTTP_REQUEST_H
 #define WEB_HTTP_REQUEST_H
 
-#include "request_param.h"
 #include "http_header.h"
+#include "request_param.h"
 #include <vector>
+using namespace std;
 
 namespace webserver {
     //Класс, который инкапсулирует в себе http запрос: HTTP заголовки,

@@ -1,13 +1,14 @@
 #include "http_request_parser.h"
+#include <sstream>
 using namespace std;
 
 namespace webserver {
 
-    bool check_is_current_header_host(const string& current_header) {
+    bool http_request_parser::check_is_current_header_host(const string& current_header) {
         return current_header == "Host";
     }
 
-    void parse_request_line(http_request& request, const vector<string>& raw_http_request) {
+    void http_request_parser::parse_request_line(http_request& request, const vector<string>& raw_http_request) {
         istringstream request_line(raw_http_request[0]);
 
         string method;
@@ -19,7 +20,7 @@ namespace webserver {
         request.set_http_request_url(request_url);
     }
 
-    void extend_request_url_by_host(const string& host, http_request& request) {
+    void http_request_parser::extend_request_url_by_host(const string& host, http_request& request) {
         string full_url;
         string url_second_part = request.get_request_url();
 
@@ -28,7 +29,7 @@ namespace webserver {
         request.set_http_request_url(full_url);
     }
 
-    void parse_request_body(http_request& request, const vector<string>& raw_http_request) {
+    void http_request_parser::parse_request_body(http_request& request, const vector<string>& raw_http_request) {
         for (auto current_message_line = raw_http_request.begin();
              current_message_line != raw_http_request.end(); current_message_line++) {
             if (*current_message_line == " ") {
@@ -37,7 +38,7 @@ namespace webserver {
         }
     }
 
-    void parse_headers(http_request& request, const vector<string>& raw_http_request) {
+    void http_request_parser::parse_headers(http_request& request, const vector<string>& raw_http_request) {
         for (auto current_message_line = raw_http_request.begin() + 1;
              current_message_line != raw_http_request.end(); current_message_line++) {
             string current_header_type;
@@ -67,7 +68,7 @@ namespace webserver {
         }
     }
 
-    http_request parse(vector<string>& raw_http_request) {
+    http_request http_request_parser::parse(vector<string>& raw_http_request) {
         http_request request;
 
         parse_request_line(request, raw_http_request);
