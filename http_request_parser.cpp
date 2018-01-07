@@ -100,8 +100,8 @@ namespace webserver {
     void add_content_type_default_header(http_request& request) {
         http_header content_type_default_header;
 
-        content_type_default_header.type = "Content-type";
-        content_type_default_header.value = "utf-8";
+        content_type_default_header.type = "Content-Type";
+        content_type_default_header.value = "text/html; charset=utf-8";
 
         request.add_http_request_header(content_type_default_header);
     }
@@ -136,17 +136,22 @@ namespace webserver {
         }
     }
 
+    bool check_is_request_body_exists_but_its_header_not {
+
+    };
+
     http_request http_request_parser::parse(vector<string>& raw_http_request) {
         http_request request;
 
         parse_request_line(request, raw_http_request);
         parse_url_to_parameters(request);
         parse_headers(request, raw_http_request);
-        if (request.check_is_content_type_header_exists()) {
-            parse_request_body(request, raw_http_request);
-        }
-        else {
-            add_content_type_default_header(request);
+        parse_request_body(request, raw_http_request);
+
+        if (!request.get_request_body().empty()) {
+            if (!request.check_is_content_type_header_exists()) {
+                add_content_type_default_header(request);
+            }
         }
 
         return request;

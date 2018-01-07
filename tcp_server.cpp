@@ -46,7 +46,7 @@ namespace webserver {
     }
 
     void tcp_server::take_requests() {
-        for (int i = 0; i > 0; i++) {
+        while (true) {
             int client_socket;
             client_socket = accept(listener_socket, (struct sockaddr*)& server_address, &socket_length);
 
