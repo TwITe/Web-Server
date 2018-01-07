@@ -28,13 +28,13 @@ namespace webserver {
     public:
         web_server(unsigned short int port, vector<web_handler> handlers);
     private:
-        function<vector <string>(char*)> convert_client_message = [&](char* request_char_buffer) {};
+        function<vector <string>(char*)> convert_client_message;
     public:
         //Запуск web-server.
         //Функция должна блокировать поток, в котором она была запущена, чтобы веб-сервер не прекращал работу мгновенно.
-        void start() {}
+        void start();
 
-        void stop() {}
+        void stop();
     };
 }
 

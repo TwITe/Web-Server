@@ -30,16 +30,16 @@ namespace webserver {
     public:
         tcp_server(unsigned short int PORT, function<vector<string>(char*)> convert_client_message);
 
-        bool start() {}
+        bool start();
 
     private:
-        void handle_client_http_request(vector<string> client_message) {}
+        void handle_client_http_request(vector<string> client_message);
 
-        void handle_client(int socket) {}
+        void handle_client(int socket);
 
-        void connection_handler(int client_socket) {}
+        void connection_handler(int client_socket);
 
-        void take_requests() {}
+        void take_requests();
     };
 }
 

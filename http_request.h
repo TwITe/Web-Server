@@ -28,27 +28,27 @@ namespace webserver {
         //Метод запроса - POST, GET, PUT, PATCH, HEADER...
         string method;
     public:
-        void set_http_request_method(const string& client_requst_method) {}
+        void set_http_request_method(const string& client_requst_method);
 
-        void set_http_request_url(const string& client_requst_url) {}
+        void set_http_request_url(const string& client_requst_url);
 
-        void set_http_request_body(const string& client_request_body) {}
+        void set_http_request_body(const string& client_request_body);
 
-        void add_http_request_param(request_param& client_request_param) {}
+        void add_http_request_param(request_param& client_request_param);
 
-        void add_http_request_header(http_header& client_request_header) {}
+        void add_http_request_header(http_header& client_request_header);
 
-        const vector<http_header>& get_headers() const {}
+        const vector<http_header>& get_headers() const;
 
-        const vector<request_param> get_request_params() const {}
+        const vector<request_param> get_request_params() const;
 
-        const string& get_request_body() const {}
+        const string& get_request_body() const;
 
-        const string& get_request_url() const {}
+        const string& get_request_url() const;
 
-        const string& get_request_method() const {}
+        const string& get_request_method() const;
 
-        bool check_is_request_body_exist() {}
+        bool check_is_request_body_exist();
     };
 }
 

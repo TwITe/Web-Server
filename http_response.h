@@ -23,13 +23,13 @@ namespace webserver {
         //Размер response_body
         unsigned long content_length;
     public:
-        void set_response_http_code(int code) {}
+        void set_response_http_code(int code);
 
-        void set_response_body(const string& response) {}
+        void set_response_body(const string& response);
 
-        void set_response_length(unsigned long response_length) {}
+        void set_response_length(unsigned long response_length);
 
-        void set_response_headers(const vector<http_header>& http_headers) {}
+        void set_response_headers(const vector<http_header>& http_headers);
     };
 }
 
