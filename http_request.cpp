@@ -1,4 +1,5 @@
 #include "http_request.h"
+using namespace std;
 namespace webserver {
 
     void http_request::set_http_request_method(const string& client_requst_method) {
@@ -42,14 +43,11 @@ namespace webserver {
     }
 
     bool http_request::check_is_request_body_exist() {
-        check_is_request_body_exist()
-        {
-            for (auto const& current_header: headers) {
-                if (current_header.type == "Content-type") {
-                    return true;
-                }
+        for (auto const& current_header: headers) {
+            if (current_header.type == "Content-type") {
+                return true;
             }
-            return false;
         }
+        return false;
     }
 }
