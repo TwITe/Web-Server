@@ -4,11 +4,7 @@ namespace webserver {
     tcp_server::tcp_server(unsigned short int PORT, function<vector<string>(char*)> convert_client_message) : PORT(PORT), convert_client_message(convert_client_message) {}
 
     void tcp_server::start() {
-        int listener_socket;
 
-        struct sockaddr_in server_address{};
-
-        socklen_t socket_length;
 
         memset(&server_address, 0, sizeof(server_address));
 
