@@ -1,5 +1,6 @@
 #ifndef WEB_SERVER_H
 #define WEB_SERVER_H
+
 #include "request_param.h"
 #include "http_request.h"
 #include "http_header.h"
@@ -28,7 +29,23 @@ namespace webserver {
     public:
         web_server(unsigned short int port, vector<web_handler> handlers);
     private:
-        function<vector <string>(char*)> convert_client_message;
+        function<vector<string>(char*)> convert_client_message = [&](char* request_char_buffer) {
+            string converted_client_message(request_char_buffer);
+
+            vector<string> message_fields;
+
+            string buffer;
+            for (auto it = converted_client_message.begin(); it != converted_client_message.end(); it++) {
+                if (*it != '\n' || it != converted_client_message.end()) {
+                    buffer.push_back(*it);
+                }
+                else {
+                    message_fields.push_back(buffer);
+                    buffer.clear();
+                }
+            }
+            return message_fields;
+        };
     public:
         //Запуск web-server.
         //Функция должна блокировать поток, в котором она была запущена, чтобы веб-сервер не прекращал работу мгновенно.

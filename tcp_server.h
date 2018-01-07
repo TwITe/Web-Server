@@ -11,6 +11,7 @@
 #include <functional>
 #include <iostream>
 #include <thread>
+#include <stdexcept>
 #include "http_request_parser.h"
 #include "http_request.h"
 using namespace std;
@@ -30,7 +31,7 @@ namespace webserver {
     public:
         tcp_server(unsigned short int PORT, function<vector<string>(char*)> convert_client_message);
 
-        bool start();
+        void start();
 
     private:
         void handle_client_http_request(vector<string> client_message);

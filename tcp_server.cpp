@@ -1,9 +1,10 @@
 #include "tcp_server.h"
 
+
 namespace webserver {
     tcp_server::tcp_server(unsigned short int PORT, function<vector<string>(char*)> convert_client_message) : PORT(PORT), convert_client_message(convert_client_message) {}
 
-    bool tcp_server::start() {
+    void tcp_server::start() {
         memset(&server_address, 0, sizeof(server_address));
 
         listener_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -11,18 +12,15 @@ namespace webserver {
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(PORT);
         if (inet_aton("127.0.0.1", &server_address.sin_addr) == 0) {
-            cout << "[Server] Invalid IP address" << endl;
-            return false;
+            throw runtime_error("[Server] Invalid IP address");
         }
 
         if (bind(listener_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
-            cout << "[Server] Binding failed" << endl;
-            return false;
+            throw runtime_error("[Server] Binding failed");
         }
 
         if (listen(listener_socket, 30) == -1) {
-            cout << "[Server] Listening failed" << endl;
-            return false;
+            throw runtime_error("[Server] Listening failed");
         }
 
         cout << "[Server] All setting are done" << endl;

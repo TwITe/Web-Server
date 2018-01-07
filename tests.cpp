@@ -35,7 +35,7 @@ TEST_CASE("Parser works well (case 1)", "[Parser]") {
     vector<webserver::http_header> proper_request_headers = proper_request.get_headers();
     vector<webserver::http_header> received_request_headers = received_request.get_headers();
 
-    for (int current_header_number = 0; current_header_number < proper_request_headers.size(); current_header_number++) {
+    for (unsigned long current_header_number = 0; current_header_number < proper_request_headers.size(); current_header_number++) {
         REQUIRE(proper_request_headers[current_header_number].type == received_request_headers[current_header_number].type);
         REQUIRE(proper_request_headers[current_header_number].value == received_request_headers[current_header_number].value);
     }
