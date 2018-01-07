@@ -43,7 +43,7 @@ namespace webserver {
         return method;
     }
 
-    bool http_request::check_is_request_body_exist() {
+    bool http_request::check_is_content_type_header_exists() {
         for (auto const& current_header: headers) {
             if (current_header.type == "Content-type") {
                 return true;

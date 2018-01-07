@@ -10,7 +10,7 @@
 namespace webserver {
     class client_http_request_handler {
     public:
-        void handle_client_http_request(vector<string> client_message) {}
+        void handle_client(vector<string> client_message);
     };
 }
 

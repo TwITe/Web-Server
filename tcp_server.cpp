@@ -28,27 +28,19 @@ namespace webserver {
         take_requests();
     }
 
-    void tcp_server::handle_client(int socket) {
+    void tcp_server::connection_handler(int client_socket) {
         char read_buffer[128000];
 
         while (true) {
-            recv(socket, read_buffer, sizeof(read_buffer), 0);
+            recv(client_socket, read_buffer, sizeof(read_buffer), 0);
             cout << "[Server] Client message accepted" << endl;
             cout << "[Server] Client message: " << read_buffer << endl;
 
             client_http_request_handler http_request_handler;
-            http_request_handler.handle_client_http_request(convert_client_message(read_buffer));
+            http_request_handler.handle_client(convert_client_message(read_buffer));
 
             memset(&read_buffer, 0, sizeof(read_buffer));
         }
-    };
-
-    void tcp_server::connection_handler(int client_socket) {
-        cout << "----------------------------" << endl << endl;
-        cout << "[Server] Connection accepted" << endl << endl;
-        cout << "----------------------------" << endl << endl;
-
-        handle_client(client_socket);
     }
 
     void tcp_server::take_requests() {

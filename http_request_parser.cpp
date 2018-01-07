@@ -20,6 +20,65 @@ namespace webserver {
         request.set_http_request_url(request_url);
     }
 
+    bool http_request_parser::check_is_request_parameters_exists(const string& url) {
+        for (auto current_char : url) {
+            if (current_char == '?') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void http_request_parser::shrink_url_to_parameters(string& url) {
+        url = url.substr(url.find('?'));
+    }
+
+    void http_request_parser::parse_parameters(const string& request_parameters, http_request& request) {
+        bool parameter_name_appeared = true;
+
+        string parameter_name;
+        string parameter_value;
+
+        for (int current_char_position = 0; current_char_position < request_parameters.size(); current_char_position++) {
+            if (request_parameters[current_char_position] == '&' || current_char_position == request_parameters.size() - 1) {
+                parameter_name_appeared = true;
+
+                request_param current_request_parameter;
+
+                current_request_parameter.name = parameter_name;
+                current_request_parameter.value = parameter_value;
+
+                request.add_http_request_param(current_request_parameter);
+
+                parameter_name.clear();
+                parameter_value.clear();
+
+                continue;
+            }
+
+            if (request_parameters[current_char_position] == '=') {
+                parameter_name_appeared = false;
+                continue;
+            }
+
+            if (parameter_name_appeared) {
+                parameter_name.push_back(request_parameters[current_char_position]);
+            }
+            else {
+                parameter_value.push_back(request_parameters[current_char_position]);
+            }
+        }
+    }
+
+    void http_request_parser::parse_url(http_request& request) {
+        string url = request.get_request_url();
+
+        if (check_is_request_parameters_exists(url)) {
+            shrink_url_to_parameters(url);
+            parse_parameters(url, request);
+        }
+    }
+
     void http_request_parser::extend_request_url_by_host(const string& host, http_request& request) {
         string full_url;
         string url_second_part = request.get_request_url();
@@ -36,6 +95,15 @@ namespace webserver {
                 request.set_http_request_body(*(current_message_line + 1));
             }
         }
+    }
+
+    void add_content_type_default_header(http_request& request) {
+        http_header content_type_default_header;
+
+        content_type_default_header.type = "Content-type";
+        content_type_default_header.value = "utf-8";
+
+        request.add_http_request_header(content_type_default_header);
     }
 
     void http_request_parser::parse_headers(http_request& request, const vector<string>& raw_http_request) {
@@ -66,14 +134,19 @@ namespace webserver {
                 extend_request_url_by_host(current_header_value, request);
             }
         }
+
+        if (request.check_is_content_type_header_exists()) {
+            add_content_type_default_header(request);
+        }
     }
 
     http_request http_request_parser::parse(vector<string>& raw_http_request) {
         http_request request;
 
         parse_request_line(request, raw_http_request);
+        parse_url(request);
         parse_headers(request, raw_http_request);
-        if (request.check_is_request_body_exist()) {
+        if (request.check_is_content_type_header_exists()) {
             parse_request_body(request, raw_http_request);
         }
 

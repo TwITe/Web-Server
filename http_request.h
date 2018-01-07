@@ -48,7 +48,7 @@ namespace webserver {
 
         const string& get_request_method() const;
 
-        bool check_is_request_body_exist();
+        bool check_is_content_type_header_exists();
     };
 }
 

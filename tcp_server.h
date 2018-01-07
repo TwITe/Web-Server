@@ -33,10 +33,7 @@ namespace webserver {
         tcp_server(unsigned short int PORT, function<vector<string>(char*)> convert_client_message);
 
         void start();
-
     private:
-        void handle_client(int socket);
-
         void connection_handler(int client_socket);
 
         void take_requests();
