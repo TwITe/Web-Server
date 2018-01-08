@@ -12,7 +12,6 @@
 #include <iostream>
 #include <thread>
 #include <stdexcept>
-//#include "client_http_request_handler.h"
 using namespace std;
 
 namespace webserver {
@@ -26,9 +25,9 @@ namespace webserver {
 
         socklen_t socket_length;
 
-        function<vector<string>(char*)> convert_client_message;
+        function<string(char*)> convert_client_message;
     public:
-        tcp_server(unsigned short int PORT, function<vector<string>(char*)> convert_client_message);
+        tcp_server(unsigned short int PORT, function<string(char*)> convert_client_message);
 
         void start();
     private:

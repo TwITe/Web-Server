@@ -29,7 +29,7 @@ namespace webserver {
     public:
         web_server(unsigned short int port, vector<web_handler> handlers);
     private:
-        function<vector<string>(char*)> convert_client_message = [&](char* request_char_buffer) {
+        function<string(char*)> convert_client_message = [&](char* request_char_buffer) {
             string converted_client_message(request_char_buffer);
 
             vector<string> message_fields;
@@ -44,7 +44,10 @@ namespace webserver {
                     buffer.clear();
                 }
             }
-            return message_fields;
+
+            http_request_parser parser;
+            http_request received_request = parser.parse(message_fields);
+
         };
     public:
         //Запуск web-server.

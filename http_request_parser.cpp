@@ -136,10 +136,6 @@ namespace webserver {
         }
     }
 
-    bool check_is_request_body_exists_but_its_header_not {
-
-    };
-
     http_request http_request_parser::parse(vector<string>& raw_http_request) {
         http_request request;
 
