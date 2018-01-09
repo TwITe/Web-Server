@@ -14,4 +14,8 @@ namespace webserver {
     void web_server::stop() {
         return;
     }
+
+    vector<web_handler> web_server::get_handlers() {
+        return handlers;
+    }
 }

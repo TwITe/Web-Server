@@ -22,6 +22,10 @@ namespace webserver {
         function<http_response(http_request)> handler;
     public:
         web_handler(string pattern, string method, function<http_response(http_request)> handler);
+
+        string get_web_handler_pattern() const;
+
+        string get_web_handler_method() const;
     };
 }
 

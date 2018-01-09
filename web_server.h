@@ -8,6 +8,7 @@
 #include "http_response.h"
 #include "tcp_server.h"
 #include "web_handler.h"
+#include "http_router.h"
 
 using namespace std;
 //Реализация простого веб-сервера.
@@ -26,6 +27,8 @@ namespace webserver {
         const unsigned short int PORT;
 
         vector<web_handler> handlers; // обработчики
+
+        http_router request_handler_router;
     public:
         web_server(unsigned short int port, vector<web_handler> handlers);
     private:
@@ -59,9 +62,7 @@ namespace webserver {
 
         void stop();
 
-        vector<web_handler> get_handlers() {
-            return handlers;
-        }
+        vector<web_handler> get_handlers();
     };
 }
 
