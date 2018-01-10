@@ -21,7 +21,7 @@ namespace webserver {
         string response_body;
 
         //Размер response_body
-        unsigned long content_length;
+        unsigned long content_length = 0;
     public:
         void set_response_http_code(int code);
 
@@ -33,11 +33,11 @@ namespace webserver {
 
         int get_response_code();
 
-        string get_response_body();
+        const string& get_response_body() const;
 
         unsigned long get_content_length();
 
-        vector<http_header> get_response_headers();
+        const vector<http_header>& get_response_headers() const;
     };
 }
 

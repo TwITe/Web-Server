@@ -21,7 +21,7 @@ namespace webserver {
         return http_code;
     }
 
-    string http_response::get_response_body() {
+    const string& http_response::get_response_body() const {
         return response_body;
     }
 
@@ -29,7 +29,7 @@ namespace webserver {
         return content_length;
     }
 
-    vector<http_header> http_response::get_response_headers() {
+    const vector<http_header>& http_response::get_response_headers() const {
         return headers;
     }
 }
