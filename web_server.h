@@ -29,6 +29,8 @@ namespace webserver {
         vector<web_handler> handlers;
 
         http_router request_handler_router;
+
+        tcp_server server;
     public:
         web_server(unsigned short int port, const vector<web_handler>& handlers);
     private:

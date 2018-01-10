@@ -39,7 +39,9 @@ namespace webserver {
             cout << "[Server] Client message: " << read_buffer << endl;
 
 
-            if (send(socket, convert_client_message(read_buffer).data(), convert_client_message(read_buffer).size(), 0) == -1) {
+            string converted_message_for_send = convert_client_message(read_buffer);
+
+            if (send(socket, converted_message_for_send.data(), converted_message_for_send.size(), 0) == -1) {
                 cout << "[Server] Message send failure" << endl;
             }
 
@@ -59,5 +61,9 @@ namespace webserver {
             thread handling_thread(&tcp_server::connection_handler, this, client_socket);
             handling_thread.detach();
         }
+    }
+
+    void tcp_server::stop() {
+        return;
     }
 }
