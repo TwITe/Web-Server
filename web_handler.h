@@ -26,6 +26,8 @@ namespace webserver {
         string get_web_handler_pattern() const;
 
         string get_web_handler_method() const;
+
+        http_response transform_request_to_response(const http_request& received_request);
     };
 }
 

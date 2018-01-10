@@ -30,6 +30,14 @@ namespace webserver {
         void set_response_length(unsigned long response_length);
 
         void set_response_headers(const vector<http_header>& http_headers);
+
+        int get_response_code();
+
+        string get_response_body();
+
+        unsigned long get_content_length();
+
+        vector<http_header> get_response_headers();
     };
 }
 

@@ -16,4 +16,20 @@ namespace webserver {
     void http_response::set_response_headers(const vector<http_header>& http_headers) {
         headers = http_headers;
     }
+
+    int http_response::get_response_code() {
+        return http_code;
+    }
+
+    string http_response::get_response_body() {
+        return response_body;
+    }
+
+    unsigned long http_response::get_content_length() {
+        return content_length;
+    }
+
+    vector<http_header> http_response::get_response_headers() {
+        return headers;
+    }
 }

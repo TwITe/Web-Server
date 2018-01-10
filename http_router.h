@@ -2,7 +2,6 @@
 #define WEB_HTTP_ROUTER_H
 
 #include "web_handler.h"
-#include "web_server.h"
 #include "http_request.h"
 
 namespace webserver {
@@ -10,7 +9,7 @@ namespace webserver {
     private:
             string get_request_pattern(const http_request& request);
     public:
-        vector<web_handler>::iterator get_suited_request_handler(vector<web_handler>& handlers, const http_request& request);
+        web_handler get_suited_request_handler(vector<web_handler>& handlers, const http_request& request);
     };
 }
 

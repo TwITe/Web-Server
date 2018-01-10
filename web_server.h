@@ -26,7 +26,7 @@ namespace webserver {
     private:
         const unsigned short int PORT;
 
-        vector<web_handler> handlers; // обработчики
+        vector<web_handler> handlers;
 
         http_router request_handler_router;
     public:
@@ -51,17 +51,17 @@ namespace webserver {
             http_request_parser parser;
             http_request request = parser.parse(message_fields);
 
-            http_response response;
+            web_handler suited_web_handler = request_handler_router.get_suited_request_handler(handlers, request);
 
-            auto suited_web_handler_iterator = request_handler_router.get_suited_request_handler(handlers, request);
+            http_response response = suited_web_handler.transform_request_to_response(request);
 
-            web_handler suited_web_handler = *suited_web_handler_iterator;
-
+            string response_http_version = "HTTP/1.1";
+            int response_status_code = response.get_response_code();
+            string response_status_line = response_http_version  + " " + to_string(response_status_code) + "\n";
 
 
 
             string return_response;
-
 
             return return_response;
         };

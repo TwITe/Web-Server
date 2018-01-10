@@ -11,4 +11,8 @@ namespace webserver {
     string web_handler::get_web_handler_pattern() const {
         return pattern;
     }
+
+    http_response web_handler::transform_request_to_response(const http_request& received_request) {
+        return handler(received_request);
+    }
 }
