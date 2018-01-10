@@ -9,6 +9,7 @@
 #include "tcp_server.h"
 #include "web_handler.h"
 #include "http_router.h"
+#include <map>
 
 using namespace std;
 //Реализация простого веб-сервера.
@@ -31,6 +32,8 @@ namespace webserver {
         http_router request_handler_router;
 
         tcp_server server;
+
+        map<int, string> reason_phrases;
     public:
         web_server(unsigned short int port, const vector<web_handler>& handlers);
     private:
@@ -53,15 +56,14 @@ namespace webserver {
             http_request_parser parser;
             http_request request = parser.parse(message_fields);
 
-            web_handler suited_web_handler = request_handler_router.get_suited_request_handler(handlers, request);
+            web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
 
-            http_response response = suited_web_handler.transform_request_to_response(request);
+            http_response response = suitable_web_handler.transform_request_to_response(request);
 
             string response_http_version = "HTTP/1.1";
             int response_status_code = response.get_response_code();
-            string response_status_line = response_http_version  + " " + to_string(response_status_code) + "\n";
-
-
+            string response_reason_phrase = reason_phrases[response_status_code];
+            string response_status_line = response_http_version  + " " + to_string(response_status_code) + " " + response_reason_phrase + "\n";
 
             string return_response;
 

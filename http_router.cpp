@@ -26,7 +26,7 @@ namespace webserver {
         return pattern;
     }
 
-    web_handler http_router::get_suited_request_handler(vector<web_handler>& handlers, const http_request& request) {
+    web_handler http_router::get_suitable_request_handler(vector<web_handler>& handlers, const http_request& request) {
         const string& client_request_method = request.get_request_method();
         string client_request_pattern = get_request_pattern(request);
 

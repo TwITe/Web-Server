@@ -9,7 +9,7 @@ namespace webserver {
     private:
             string get_request_pattern(const http_request& request);
     public:
-        web_handler get_suited_request_handler(vector<web_handler>& handlers, const http_request& request);
+        web_handler get_suitable_request_handler(vector<web_handler>& handlers, const http_request& request);
     };
 }
 
