@@ -3,7 +3,7 @@
 namespace webserver {
     string http_router::get_request_pattern(const http_request& request) {
         string pattern;
-        string url = request.get_request_url();
+        const string& url = request.get_request_url();
 
         size_t request_params_begin_position = url.find('?');
         size_t http_prefix_end_position = url.find("://");

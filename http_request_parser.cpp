@@ -3,7 +3,6 @@
 using namespace std;
 
 namespace webserver {
-
     bool http_request_parser::check_is_current_header_host(const string& current_header) {
         return current_header == "Host";
     }

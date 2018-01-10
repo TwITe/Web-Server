@@ -5,7 +5,6 @@
 using namespace std;
 
 namespace webserver {
-
     struct http_header {
         //Тип заголовка (например, Content-type)
         string type;

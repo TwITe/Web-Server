@@ -30,9 +30,9 @@ namespace webserver {
 
         http_router request_handler_router;
     public:
-        web_server(unsigned short int port, vector<web_handler> handlers);
+        web_server(unsigned short int port, const vector<web_handler>& handlers);
     private:
-        function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> char* {
+        function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
             string converted_client_message(request_char_buffer);
 
             vector<string> message_fields;
@@ -43,16 +43,26 @@ namespace webserver {
                     buffer.push_back(*it);
                 }
                 else {
-                    message_fields.push_back(buffer);
+                    message_fields.emplace_back(buffer);
                     buffer.clear();
                 }
             }
 
             http_request_parser parser;
-            http_request received_request = parser.parse(message_fields);
+            http_request request = parser.parse(message_fields);
+
+            http_response response;
+
+            auto suited_web_handler_iterator = request_handler_router.get_suited_request_handler(handlers, request);
+
+            web_handler suited_web_handler = *suited_web_handler_iterator;
 
 
-            char* return_response = new char[128000];
+
+
+            string return_response;
+
+
             return return_response;
         };
     public:
@@ -61,8 +71,6 @@ namespace webserver {
         void start();
 
         void stop();
-
-        vector<web_handler> get_handlers();
     };
 }
 

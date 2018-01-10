@@ -1,7 +1,7 @@
 #include "web_server.h"
 
 namespace webserver {
-    web_server::web_server(unsigned short int port, vector<web_handler> handlers) : PORT(port), handlers(handlers) {}
+    web_server::web_server(unsigned short int port, const vector<web_handler>& handlers) : PORT(port), handlers(handlers) {}
 
     //Запуск web-server.
     //Функция должна блокировать поток, в котором она была запущена, чтобы веб-сервер не прекращал работу мгновенно.
@@ -13,9 +13,5 @@ namespace webserver {
 
     void web_server::stop() {
         return;
-    }
-
-    vector<web_handler> web_server::get_handlers() {
-        return handlers;
     }
 }
