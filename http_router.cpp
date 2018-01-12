@@ -6,7 +6,7 @@ namespace webserver {
         const string& url = request.get_request_url();
 
         size_t request_params_begin_position = url.find('?');
-        size_t http_prefix_end_position = url.find("://");
+        size_t http_prefix_end_position = url.find("://") + 3;
 
         string shrinked_url;
 
