@@ -63,11 +63,12 @@ namespace webserver {
             string response_http_version = "HTTP/1.1";
             int response_status_code = response.get_response_code();
             string response_reason_phrase = reason_phrases[response_status_code];
-            string response_status_line =
-                    response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase + "\n";
+
+            string response_status_line = response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase + "\n";
 
             string converted_response;
             converted_response += response_status_line;
+
             vector<http_header> response_headers = response.get_response_headers();
 
             for (const http_header& current_header : response_headers) {
