@@ -47,9 +47,9 @@ namespace webserver {
         const string& client_request_method = request.get_request_method();
         string client_request_pattern = get_request_pattern(request);
 
-        web_handler suitable_web_handler(nullptr, nullptr, nullptr);
+        web_handler suitable_web_handler("", "", nullptr);
 
-        for (auto& current_web_handler : handlers) {
+        for (const auto& current_web_handler : handlers) {
             const string& current_web_handler_pattern = current_web_handler.get_web_handler_pattern();
             const string& current_web_handler_method = current_web_handler.get_web_handler_method();
             if (current_web_handler_method == client_request_method && current_web_handler_pattern == client_request_pattern) {
@@ -60,6 +60,7 @@ namespace webserver {
         if (suitable_web_handler.empty()) {
             suitable_web_handler = generate_default_error_handler();
         }
+
         return suitable_web_handler;
     }
 }
