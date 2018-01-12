@@ -17,7 +17,7 @@ namespace webserver {
         headers = http_headers;
     }
 
-    int http_response::get_response_code() {
+    int http_response::get_response_code() const {
         return http_code;
     }
 
@@ -25,7 +25,7 @@ namespace webserver {
         return response_body;
     }
 
-    unsigned long http_response::get_content_length() {
+    unsigned long http_response::get_content_length() const {
         return content_length;
     }
 

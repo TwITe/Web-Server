@@ -31,11 +31,11 @@ namespace webserver {
 
         void set_response_headers(const vector<http_header>& http_headers);
 
-        int get_response_code();
+        int get_response_code() const;
 
         const string& get_response_body() const;
 
-        unsigned long get_content_length();
+        unsigned long get_content_length() const;
 
         const vector<http_header>& get_response_headers() const;
     };
