@@ -7,7 +7,9 @@
 namespace webserver {
     class http_router {
     private:
-            string get_request_pattern(const http_request& request);
+        string get_request_pattern(const http_request& request);
+
+        web_handler generate_default_error_handler();
     public:
         web_handler get_suitable_request_handler(vector<web_handler>& handlers, const http_request& request);
     };
