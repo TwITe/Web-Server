@@ -28,7 +28,7 @@ namespace webserver {
         return false;
     }
 
-    string http_request_parser::shrink_url_to_parameters(string& url) {
+    string http_request_parser::shrink_url_to_parameters(const string& url) {
         string shrinked_url = url.substr(url.find('?'));;
         return shrinked_url;
     }
@@ -144,7 +144,9 @@ namespace webserver {
         parse_headers(request, raw_http_request);
         parse_request_body(request, raw_http_request);
 
-        if (!request.get_request_body().empty()) {
+        string request_body = request.get_request_body();
+
+        if (!request_body.empty()) {
             if (!request.check_is_content_type_header_exists()) {
                 add_content_type_default_header(request);
             }

@@ -10,7 +10,7 @@ namespace webserver {
 
         void parse_request_line(http_request& request, const vector<string>& raw_http_request);
 
-        string shrink_url_to_parameters(string& url);
+        string shrink_url_to_parameters(const string& url);
 
         void parse_parameters(const string& request_parameters, http_request& request);
 
