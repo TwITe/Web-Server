@@ -5,6 +5,8 @@ using namespace std;
 TEST_CASE("Get Proper Suitable Web Handler", "HTTP Router") {
     vector<webserver::web_handler> handlers;
 
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
     function<webserver::http_response(webserver::http_request)> index_handler = [&](webserver::http_request request) {
         webserver::http_response response;
 
@@ -20,6 +22,8 @@ TEST_CASE("Get Proper Suitable Web Handler", "HTTP Router") {
 
         return response;
     };
+    _Pragma("GCC diagnostic pop") \
+
     webserver::web_handler proper_web_handler("/im", "POST", index_handler);
 
     handlers.emplace_back(proper_web_handler);
@@ -32,8 +36,10 @@ TEST_CASE("Get Proper Suitable Web Handler", "HTTP Router") {
     webserver::web_handler received_web_handler = test_router.get_suitable_request_handler(handlers, test_request);
 
 
-    const string& received_web_handler_method = received_web_handler.get_web_handler_method(), proper_web_handler_method = proper_web_handler.get_web_handler_method();
-    const string& received_web_handler_pattern = received_web_handler.get_web_handler_pattern(), proper_web_handler_pattern = proper_web_handler.get_web_handler_pattern();
+    const string& received_web_handler_method = received_web_handler.get_web_handler_method();
+    const string& proper_web_handler_method = proper_web_handler.get_web_handler_method();
+    const string& received_web_handler_pattern = received_web_handler.get_web_handler_pattern();
+    const string& proper_web_handler_pattern = proper_web_handler.get_web_handler_pattern();
 
     REQUIRE(received_web_handler_method == proper_web_handler_method);
     REQUIRE(received_web_handler_pattern == proper_web_handler_pattern);
@@ -42,6 +48,8 @@ TEST_CASE("Get Proper Suitable Web Handler", "HTTP Router") {
 TEST_CASE("Non-existing Handler: Get Error Handler", "HTTP Router") {
     vector<webserver::web_handler> handlers;
 
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
     function<webserver::http_response(webserver::http_request)> index_handler = [&](webserver::http_request request) {
         webserver::http_response response;
 
@@ -57,6 +65,8 @@ TEST_CASE("Non-existing Handler: Get Error Handler", "HTTP Router") {
 
         return response;
     };
+    _Pragma("GCC diagnostic pop")
+
     webserver::web_handler proper_web_handler("/im", "POST", index_handler);
 
     handlers.emplace_back(proper_web_handler);
@@ -71,7 +81,9 @@ TEST_CASE("Non-existing Handler: Get Error Handler", "HTTP Router") {
     const string& received_web_handler_method = received_web_handler.get_web_handler_method();
     const string& received_web_handler_pattern = received_web_handler.get_web_handler_pattern();
 
-    webserver::http_response transformed_response = received_web_handler.transform_request_to_response(test_request);
+
+    webserver::request_to_response_transform_handler request_transform_handler;
+    webserver::http_response transformed_response = request_transform_handler.transform_request_to_response(received_web_handler, test_request);
     const string& incorrect_response_body = transformed_response.get_response_body();
 
     REQUIRE(received_web_handler_method.empty());
