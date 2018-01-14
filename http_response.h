@@ -21,7 +21,7 @@ namespace webserver {
         string response_body;
 
         //Размер response_body
-        unsigned long content_length = 0;
+        unsigned long content_length;
     public:
         void set_response_http_code(int code);
 
