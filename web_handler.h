@@ -21,15 +21,13 @@ namespace webserver {
         //Функция задаётся пользователем, но web-server обязан корректно инициализировать http_reqeust.
         function<http_response(http_request)> handler;
     public:
-        web_handler(string pattern, string method, function<http_response(http_request)> handler);
+        web_handler(const string& pattern, const string& method, function<http_response(http_request)> handler);
 
         const string& get_web_handler_pattern() const;
 
         const string& get_web_handler_method() const;
 
-        http_response transform_request_to_response(const http_request& received_request);
-
-        bool empty();
+        const function<http_response(http_request)>& get_transform_to_response_function() const;
     };
 }
 
