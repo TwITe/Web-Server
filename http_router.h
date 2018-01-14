@@ -11,7 +11,7 @@ namespace webserver {
 
         web_handler generate_default_error_handler();
     public:
-        web_handler get_suitable_request_handler(vector<web_handler>& handlers, const http_request& request);
+        web_handler get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request);
     };
 }
 

@@ -6,7 +6,8 @@ namespace webserver {
         const string& url = request.get_request_url();
 
         size_t request_params_begin_position = url.find('?');
-        size_t http_prefix_end_position = url.find("://") + 3;
+        string protocol_delimiter = "://";
+        size_t http_prefix_end_position = url.find(protocol_delimiter) + protocol_delimiter.size();
 
         string shrinked_url;
 
@@ -25,8 +26,10 @@ namespace webserver {
 
         return pattern;
     }
-
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
     web_handler http_router::generate_default_error_handler() {
+
         function<webserver::http_response(webserver::http_request)> error_index_handler = [&](webserver::http_request request) {
             webserver::http_response response;
 
@@ -42,25 +45,20 @@ namespace webserver {
 
         return error_handler;
     }
+    _Pragma("GCC diagnostic pop")
 
-    web_handler http_router::get_suitable_request_handler(vector<web_handler>& handlers, const http_request& request) {
+    web_handler http_router::get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request) {
         const string& client_request_method = request.get_request_method();
         string client_request_pattern = get_request_pattern(request);
-
-        web_handler suitable_web_handler("", "", nullptr);
 
         for (const auto& current_web_handler : handlers) {
             const string& current_web_handler_pattern = current_web_handler.get_web_handler_pattern();
             const string& current_web_handler_method = current_web_handler.get_web_handler_method();
             if (current_web_handler_method == client_request_method && current_web_handler_pattern == client_request_pattern) {
-                suitable_web_handler = current_web_handler;
+                return current_web_handler;
             }
         }
 
-        if (suitable_web_handler.empty()) {
-            suitable_web_handler = generate_default_error_handler();
-        }
-
-        return suitable_web_handler;
+        return generate_default_error_handler();
     }
 }
