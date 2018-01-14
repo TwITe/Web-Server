@@ -9,6 +9,7 @@
 #include "tcp_server.h"
 #include "web_handler.h"
 #include "http_router.h"
+#include "request_to_response_transform_handler.h"
 #include <map>
 
 using namespace std;
@@ -25,8 +26,6 @@ using namespace std;
 namespace webserver {
     class web_server {
     private:
-        const unsigned short int PORT;
-
         vector<web_handler> handlers;
 
         http_router request_handler_router;
@@ -34,6 +33,10 @@ namespace webserver {
         tcp_server server;
 
         map<int, string> reason_phrases;
+
+        http_request_parser parser;
+
+        request_to_response_transform_handler request_transform_handler;
     public:
         web_server(unsigned short int port, const vector<web_handler>& handlers);
     private:
@@ -43,22 +46,31 @@ namespace webserver {
             vector<string> message_fields;
 
             string buffer;
+
             for (auto it = converted_client_message.begin(); it != converted_client_message.end(); it++) {
-                if (*it != '\n' || it != converted_client_message.end()) {
+                if (*it != '\n' || *it != '\r' || it != converted_client_message.end()) {
                     buffer.push_back(*it);
                 }
                 else {
                     message_fields.emplace_back(buffer);
                     buffer.clear();
+
+                    if (it != converted_client_message.end()) {
+                        ++it;
+                        if (*(it + 1) == '\n') {
+                            ++it;
+                        }
+                    }
                 }
             }
 
-            http_request_parser parser;
             http_request request = parser.parse(message_fields);
 
             web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
 
-            http_response response = suitable_web_handler.transform_request_to_response(request);
+            http_response response;
+
+            response = request_transform_handler.transform_request_to_response(suitable_web_handler, request);
 
             string response_http_version = "HTTP/1.1";
             int response_status_code = response.get_response_code();

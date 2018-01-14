@@ -1,7 +1,7 @@
 #include "web_server.h"
 
 namespace webserver {
-    web_server::web_server(unsigned short int port, const vector<web_handler>& handlers) : PORT(port), handlers(handlers), server(port, convert_client_message) {
+    web_server::web_server(unsigned short int port, const vector<web_handler>& handlers) : handlers(handlers), server(port, convert_client_message) {
         reason_phrases[100] = "Continue";
         reason_phrases[101] = "Switching Protocols";
         reason_phrases[200] = "OK";
