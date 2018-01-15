@@ -64,9 +64,7 @@ namespace webserver {
             cout << "[Server] Connection accepted" << endl << endl;
             cout << "----------------------------" << endl << endl;
 
-            int new_socket = client_socket;
-
-            thread handling_thread(&tcp_server::connection_handler, this, new_socket);
+            thread handling_thread(&tcp_server::connection_handler, this, client_socket);
             handling_thread.detach();
         }
     }
