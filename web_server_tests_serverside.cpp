@@ -1,9 +1,13 @@
+#define CATCH_CONFIG_MAIN
 #include "web_server.h"
+#include "catch.hpp"
 using namespace std;
 
-int main() {
+TEST_CASE("Check base functions work (server)","Server") {
     vector<webserver::web_handler> handlers;
 
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
     function<webserver::http_response(webserver::http_request)> index_handler = [&](webserver::http_request request) {
         webserver::http_response response;
 
@@ -19,6 +23,8 @@ int main() {
 
         return response;
     };
+    _Pragma("GCC diagnostic pop")
+
     webserver::web_handler index_web_handler("/index", "GET", index_handler);
 
     handlers.push_back(index_web_handler);
@@ -26,6 +32,4 @@ int main() {
     webserver::web_server server(8080, handlers);
 
     server.start();
-
-    return 0;
 }

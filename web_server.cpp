@@ -42,7 +42,6 @@ namespace webserver {
         reason_phrases[503] = "Service Unavailable";
         reason_phrases[504] = "Gateway Time-out";
         reason_phrases[505] = "HTTP Version not supported";
-        reason_phrases[102] = "Frontenders are gays";
     }
 
     //Запуск web-server.
