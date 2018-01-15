@@ -22,7 +22,7 @@ TEST_CASE("Get Proper Suitable Web Handler", "HTTP Router") {
 
         return response;
     };
-    _Pragma("GCC diagnostic pop") \
+    _Pragma("GCC diagnostic pop")
 
     webserver::web_handler proper_web_handler("/im", "POST", index_handler);
 
