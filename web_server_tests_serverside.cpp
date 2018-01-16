@@ -27,7 +27,7 @@ TEST_CASE("Check base functions work (server)","Server") {
 
     webserver::web_handler index_web_handler("/index", "GET", index_handler);
 
-    handlers.push_back(index_web_handler);
+    handlers.emplace_back(index_web_handler);
 
     webserver::web_server server(8080, handlers);
 
