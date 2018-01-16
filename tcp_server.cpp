@@ -39,18 +39,20 @@ namespace webserver {
             cout << "[Server] Client message accepted" << endl;
             cout << "[Server] Client message: " << endl << read_buffer << endl;
 
-//            string converted_message_for_send = convert_client_message(read_buffer);
-//
-//            if (send(socket, converted_message_for_send.data(), converted_message_for_send.size(), 0) == -1) {
+            //string converted_message_for_send = convert_client_message(read_buffer);
+
+//            if (send(socket, converted_message_for_send.c_str(), converted_message_for_send.size(), 0) == -1) {
 //                cout << "[Server] Message send failure" << endl;
 //            }
 
-            if (write(socket, read_buffer, message_size) == -1) {
+            if (send(socket, read_buffer, message_size, 0) == -1) {
                 cout << "[Client] Message sending failed" << endl;
                 return;
             }
             cout << "[Server] Message sent to client" << endl << endl;
             cout << "============================" << endl << endl;
+
+
 
             memset(&read_buffer, 0, 128000);
         }
@@ -61,7 +63,7 @@ namespace webserver {
         while (true) {
             client_socket = accept(listener_socket, (struct sockaddr*)& server_address, &socket_length);
             cout << "----------------------------" << endl << endl;
-            cout << "[Server] Connection accepted" << endl << endl;
+            cout << "[Server] New connection accepted" << endl << endl;
             cout << "----------------------------" << endl << endl;
 
             thread handling_thread(&tcp_server::connection_handler, this, client_socket);
