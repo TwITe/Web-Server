@@ -32,11 +32,12 @@ namespace webserver {
 
     void tcp_server::connection_handler(int socket) {
         char read_buffer[128000];
+        memset(&read_buffer, 0, sizeof(read_buffer));
+        size_t message_size = 0;
 
-        while ((recv(socket, read_buffer, sizeof(read_buffer) - 1, 0)) > 0) {
+        while ((message_size = static_cast<size_t>(recv(socket, read_buffer, sizeof(read_buffer), 0))) > 0) {
             cout << "[Server] Client message accepted" << endl;
-            cout << "[Server] Client message: " << read_buffer << endl;
-            cout.flush();
+            cout << "[Server] Client message: " << endl << read_buffer << endl;
 
 //            string converted_message_for_send = convert_client_message(read_buffer);
 //
@@ -44,15 +45,14 @@ namespace webserver {
 //                cout << "[Server] Message send failure" << endl;
 //            }
 
-            if (write(socket, read_buffer, sizeof(read_buffer)) == -1) {
+            if (write(socket, read_buffer, message_size) == -1) {
                 cout << "[Client] Message sending failed" << endl;
                 return;
             }
             cout << "[Server] Message sent to client" << endl << endl;
             cout << "============================" << endl << endl;
-            cout.flush();
 
-            memset(&read_buffer, 0, sizeof(read_buffer));
+            memset(&read_buffer, 0, 128000);
         }
     }
 
