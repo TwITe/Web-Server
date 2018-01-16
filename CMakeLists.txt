@@ -8,7 +8,8 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
         http_request_parser.h http_request.cpp http_request_parser.cpp http_response.cpp http_response.h tcp_server.cpp
         tcp_server.h web_handler.cpp web_handler.h web_server.cpp http_router.cpp http_router.h
         request_to_response_transform_handler.cpp request_to_response_transform_handler.h
-
-#        request_parser_tests.cpp
-#        http_router_tests.cpp
-        #[[web_server_tests_serverside.cpp]] web_server_tests_clientside.cpp)
+#        tests
+        catch_include.h
+        request_parser_tests.cpp
+        http_router_tests.cpp
+        #[[web_server_run.cpp]] web_server_tests_clientside.cpp)
