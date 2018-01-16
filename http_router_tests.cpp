@@ -1,5 +1,5 @@
 #include "web_server.h"
-#include "catch.hpp"
+#include "catch_include.h"
 using namespace std;
 
 TEST_CASE("Get Proper Suitable Web Handler", "HTTP Router") {

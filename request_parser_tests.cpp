@@ -1,6 +1,5 @@
-#define CATCH_CONFIG_MAIN
 #include "web_server.h"
-#include "catch.hpp"
+#include "catch_include.h"
 
 using namespace std;
 
