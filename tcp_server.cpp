@@ -1,7 +1,7 @@
 #include "tcp_server.h"
 
 namespace webserver {
-    tcp_server::tcp_server(unsigned short int PORT, function<string(char*)> convert_client_message) : PORT(PORT), convert_client_message(convert_client_message) {}
+    tcp_server::tcp_server(unsigned short int PORT, function<string(char*)>& convert_client_message) : PORT(PORT), convert_client_message(convert_client_message) {}
 
     void tcp_server::start() {
         memset(&server_address, 0, sizeof(server_address));
@@ -39,20 +39,20 @@ namespace webserver {
             cout << "[Server] Client message accepted" << endl;
             cout << "[Server] Client message: " << endl << read_buffer << endl;
 
-            //string converted_message_for_send = convert_client_message(read_buffer);
+            string converted_message_for_send = convert_client_message(read_buffer);
 
 //            if (send(socket, converted_message_for_send.c_str(), converted_message_for_send.size(), 0) == -1) {
 //                cout << "[Server] Message send failure" << endl;
 //            }
 
-            if (send(socket, read_buffer, message_size, 0) == -1) {
-                cout << "[Client] Message sending failed" << endl;
-                return;
-            }
+            cout << converted_message_for_send << endl;
+
+//            if (send(socket, read_buffer, message_size, 0) == -1) {
+//                cout << "[Client] Message sending failed" << endl;
+//                return;
+//            }
             cout << "[Server] Message sent to client" << endl << endl;
             cout << "============================" << endl << endl;
-
-
 
             memset(&read_buffer, 0, 128000);
         }
