@@ -48,7 +48,12 @@ TEST_CASE("Check base read/send functions","Client") {
 
     string received_message = string(buffer);
 
-    REQUIRE(received_message == message);
+    string proper_response = "HTTP/1.1 404 Not Found\n"
+            "Content-Length: 26\n"
+            "\n"
+            "Oops! Something went wrong\n";
+
+    REQUIRE(received_message == proper_response);
 
     cout << "[Client] Server message: " << buffer << endl;
     cout << "============================" << endl << endl;
