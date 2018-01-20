@@ -1,6 +1,5 @@
 #include "web_server.h"
-#include "catch_include.h"
-
+#include "catch.hpp"
 using namespace std;
 
 TEST_CASE("Parser case 1: parse headers", "Parser") {

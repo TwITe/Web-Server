@@ -1,5 +1,5 @@
 #include "web_server.h"
-#include "catch_include.h"
+#include "catch.hpp"
 using namespace std;
 
 TEST_CASE("Check base read/send functions","Client") {
@@ -40,7 +40,6 @@ TEST_CASE("Check base read/send functions","Client") {
         cout << "[Client] Message sending failed" << endl;
     }
     cout << "[Client] Message sent to server" << endl;
-    cout.flush();
 
     char buffer[128000];
 
@@ -53,5 +52,4 @@ TEST_CASE("Check base read/send functions","Client") {
 
     cout << "[Client] Server message: " << buffer << endl;
     cout << "============================" << endl << endl;
-    cout.flush();
 }
