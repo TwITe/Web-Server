@@ -33,9 +33,8 @@ namespace webserver {
     void tcp_server::connection_handler(int socket) {
         char read_buffer[128000];
         memset(&read_buffer, 0, sizeof(read_buffer));
-        size_t message_size = 0;
 
-        while ((message_size = static_cast<size_t>(recv(socket, read_buffer, sizeof(read_buffer), 0))) > 0) {
+        while ((static_cast<size_t>(recv(socket, read_buffer, sizeof(read_buffer), 0))) > 0) {
             cout << "[Server] Client message accepted" << endl;
             cout << "[Server] Client message: " << endl << read_buffer << endl;
 
