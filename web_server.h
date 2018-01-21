@@ -36,9 +36,9 @@ namespace webserver {
 
         http_request_parser parser;
 
-        request_to_response_transform_handler request_transform_handler;
-
         function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
+            //TODO:Сделать класс по конвертации http_response в строку
+            //TODO:Убрать класс request_to_response_transform_handler и сделать создание функции и дальнейшее использование геттера
             string converted_client_message(request_char_buffer);
 
             vector<string> message_fields;
@@ -65,9 +65,9 @@ namespace webserver {
 
             web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
 
-            http_response response;
+            const function<http_response(http_request)>& handler = suitable_web_handler.get_transform_to_response_function();
 
-            response = request_transform_handler.transform_request_to_response(suitable_web_handler, request);
+            http_response response = handler(request);
 
             string response_http_version = "HTTP/1.1";
             int response_status_code = response.get_response_code();
@@ -84,11 +84,9 @@ namespace webserver {
                 converted_response += current_header.type + ": " + current_header.value + "\n";
             }
 
-            bool is_response_message_body_exists;
-
             unsigned long response_body_length = response.get_content_length();
 
-            is_response_message_body_exists = response_body_length != 0;
+            bool is_response_message_body_exists = (response_body_length != 0);
 
             if (is_response_message_body_exists) {
                 http_header entity_content_length_header;
