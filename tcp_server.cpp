@@ -7,6 +7,7 @@ namespace webserver {
         memset(&server_address, 0, sizeof(server_address));
 
         listener_socket = socket(AF_INET, SOCK_STREAM, 0);
+        int allowed_connections_number = 30;
 
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(PORT);
@@ -21,7 +22,7 @@ namespace webserver {
         cout << "[Server] Configuring done" << endl;
         cout << "[Server] Server enabled" << endl;
 
-        if (listen(listener_socket, 30) == -1) {
+        if (listen(listener_socket, allowed_connections_number) == -1) {
             throw runtime_error("[Server] Listening failed");
         }
 
@@ -34,7 +35,8 @@ namespace webserver {
         char read_buffer[128000];
         memset(&read_buffer, 0, sizeof(read_buffer));
 
-        while ((static_cast<size_t>(recv(socket, read_buffer, sizeof(read_buffer), 0))) > 0) {
+        //TODO:Сделать чтение буферами по 1024 байта
+        while ((static_cast<size_t>(recv(socket, read_buffer, 512000, 0))) > 0) {
             cout << "[Server] Client message accepted" << endl;
             cout << "[Server] Client message: " << endl << read_buffer << endl;
 
