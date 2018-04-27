@@ -9,7 +9,6 @@
 #include "tcp_server.h"
 #include "web_handler.h"
 #include "http_router.h"
-#include "request_to_response_transform_handler.h"
 #include <map>
 
 using namespace std;
@@ -38,7 +37,6 @@ namespace webserver {
 
         function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
             //TODO:Сделать класс по конвертации http_response в строку
-            //TODO:Убрать класс request_to_response_transform_handler и сделать создание функции и дальнейшее использование геттера
             string converted_client_message(request_char_buffer);
 
             vector<string> message_fields;
