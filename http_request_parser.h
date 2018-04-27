@@ -12,7 +12,7 @@ namespace webserver {
 
         string shrink_url_to_parameters(const string& url);
 
-        void parse_parameters(const string& request_parameters, http_request& request);
+        void parse_request_parameters(const string& request_parameters, http_request& request);
 
         void parse_url_to_parameters(http_request& request);
 
@@ -22,7 +22,7 @@ namespace webserver {
 
         void parse_headers(http_request& request, const vector<string>& raw_http_request);
 
-        bool check_is_request_parameters_exists(const string& url);
+        bool check_if_request_parameters_exists(const string& url);
     public:
         http_request parse(vector<string>& raw_http_request);
     };
