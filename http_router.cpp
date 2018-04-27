@@ -48,6 +48,8 @@ namespace webserver {
     _Pragma("GCC diagnostic pop")
 
     web_handler http_router::get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request) {
+        // данная функция ищет нужный обработчик (web handler) для того запроса который пришел, для его
+        // обработки. ищет по имеещемуся набору обработчиков
         const string& client_request_method = request.get_request_method();
         string client_request_pattern = get_request_pattern(request);
 
