@@ -45,7 +45,7 @@ namespace webserver {
             if (send(socket, converted_message_for_send.c_str(), converted_message_for_send.size(), 0) == -1) {
                 cout << "[Server] Message send failure" << endl;
             }
-
+//
             cout << converted_message_for_send << endl;
 
             cout << "[Server] Message sent to client" << endl << endl;
