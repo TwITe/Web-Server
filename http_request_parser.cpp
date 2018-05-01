@@ -117,7 +117,7 @@ namespace webserver {
             string current_header_type;
             string current_header_value;
 
-            // TODO: что это за вообще проверка??? переделать
+            // TODO: переделать эту проверку, непонятно что за строка
             if (*current_message_line == " ") {
                 break;
             }
@@ -156,7 +156,6 @@ namespace webserver {
 
         if (!request_body.empty()) {
             // эта функция проверяет наличие content_type_header, если его нет, то добавляет дефолтный
-            // TODO: а зачем добавлять, надо вспомнить. Возможно, этого требует стандарт
             if (!request.check_is_content_type_header_exists()) {
                 add_content_type_default_header(request);
             }
