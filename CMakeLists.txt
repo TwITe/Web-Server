@@ -17,7 +17,7 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
 #        http_router_tests.cpp
 
 #        web server tests
-#        run server firstly and only then clientside tests, do not running server again
+#        run server firstly and only then clientside tests, not running server again
 #        web server launch
 #        ------------------
 #        web_server_run.cpp
