@@ -54,7 +54,7 @@ TEST_CASE("Check base read/send functions","Client") {
             "Oops! Something went wrong\n";
 
     REQUIRE(received_message == proper_response);
-//
+////
     cout << "[Client] Server message: " << buffer << endl;
     cout << "============================" << endl << endl;
 }
