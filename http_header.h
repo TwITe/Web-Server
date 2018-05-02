@@ -11,7 +11,6 @@ namespace webserver {
         //Значение заголовка (например, text/html; charset=utf-8)
         string value;
     };
-
 }
 
 #endif //WEB_HTTP_HEADER_H

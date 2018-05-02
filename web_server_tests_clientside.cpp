@@ -2,6 +2,8 @@
 #include "catch.hpp"
 using namespace std;
 
+//TODO: Добавить тест по отправлению пустой строки
+
 TEST_CASE("Check for getting 404 response because of non-existing web handler for current request","Client") {
     unsigned short int PORT = 8080;
     int sockfd;
@@ -53,8 +55,8 @@ TEST_CASE("Check for getting 404 response because of non-existing web handler fo
                              "\n"
                              "Oops! Something went wrong\n";
 
-    REQUIRE(received_message == proper_response);
-
     cout << "[Client] Server message: " << buffer << endl;
     cout << "============================" << endl << endl;
+
+    REQUIRE(received_message == proper_response);
 }
