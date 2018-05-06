@@ -2,12 +2,10 @@
 #include "catch.hpp"
 using namespace std;
 
-//TODO: Добавить тест по отправлению пустой строки
+//TODO: Добавить тест по отправлению пустой строки. Должен придти 400 (bad request) response
 
-TEST_CASE("Get 404 response for request with non-existing web handler","Client") {
-    unsigned short int PORT = 8080;
-    int sockfd;
-    struct sockaddr_in server_address{};
+void open_connection(unsigned short int PORT, int& sockfd, struct sockaddr_in& server_address) {
+    server_address = {};
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -24,6 +22,13 @@ TEST_CASE("Get 404 response for request with non-existing web handler","Client")
     cout << "[Client] All setting are done" << endl;
     cout << "[Client] Succefully connected to server" << endl << endl;
     cout << "----------------------------" << endl << endl;
+}
+
+TEST_CASE("Get 404 response for request with non-existing web handler","Client") {
+    unsigned short int PORT = 8080;
+    int sockfd;
+    struct sockaddr_in server_address;
+    open_connection(PORT, sockfd, server_address);
 
     string message = "GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1\n"
                      "Host: net.tutsplus.com\n"
@@ -59,4 +64,12 @@ TEST_CASE("Get 404 response for request with non-existing web handler","Client")
     cout << "============================" << endl << endl;
 
     REQUIRE(received_message == proper_response);
+}
+
+TEST_CASE("Get 400 response for bad request","") {
+    unsigned short int PORT = 8080;
+    int sockfd;
+    struct sockaddr_in server_address;
+    open_connection(PORT, sockfd, server_address);
+
 }

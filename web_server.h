@@ -36,11 +36,11 @@ namespace webserver {
         http_request_parser parser;
 
         function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
-            //TODO:Сделать класс по конвертации http_response в строку
+            //TODO: создать классы для отдельных задач, множество котороых выполняет вся эта одна функция.
+                    // Использовать их в функции
             string converted_client_message(request_char_buffer);
 
             vector<string> message_fields;
-
             string buffer;
 
             for (auto it = converted_client_message.begin(); it != converted_client_message.end(); it++) {
