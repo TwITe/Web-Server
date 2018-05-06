@@ -12,11 +12,13 @@ namespace webserver {
 
         string method;
         string request_url;
+        string http_version;
 
-        request_line >> method >> request_url;
+        request_line >> method >> request_url >> http_version;
 
         request.set_http_request_method(method);
         request.set_http_request_url(request_url);
+        request.set_http_version(http_version);
     }
 
     bool http_request_parser::check_if_request_parameters_exists(const string& url) {

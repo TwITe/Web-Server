@@ -4,7 +4,7 @@ using namespace std;
 
 //TODO: Добавить тест по отправлению пустой строки
 
-TEST_CASE("Check for getting 404 response because of non-existing web handler for current request","Client") {
+TEST_CASE("Get 404 response for request with non-existing web handler","Client") {
     unsigned short int PORT = 8080;
     int sockfd;
     struct sockaddr_in server_address{};
