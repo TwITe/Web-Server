@@ -10,6 +10,10 @@ namespace webserver {
         url = client_requst_url;
     }
 
+    void http_request::set_http_version(const string& client_http_version) {
+        http_version = client_http_version;
+    }
+
     void http_request::set_http_request_body(const string& client_request_body) {
         request_body = client_request_body;
     }

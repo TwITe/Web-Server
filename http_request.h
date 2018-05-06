@@ -27,10 +27,15 @@ namespace webserver {
 
         //Метод запроса - POST, GET, PUT, PATCH, HEADER...
         string method;
+
+        //Версия HTTP - указывается в request line
+        string http_version;
     public:
         void set_http_request_method(const string& client_requst_method);
 
         void set_http_request_url(const string& client_requst_url);
+
+        void set_http_version(const string& client_http_version);
 
         void set_http_request_body(const string& client_request_body);
 
