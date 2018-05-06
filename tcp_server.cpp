@@ -43,7 +43,7 @@ namespace webserver {
             string converted_message_for_send = convert_client_message(read_buffer);
 
             if (send(socket, converted_message_for_send.c_str(), converted_message_for_send.size(), 0) == -1) {
-                cout << "[Server] Message send failure" << endl;
+                cout << "[Server] Message sending failed" << endl;
             }
 
             cout << converted_message_for_send << endl;
@@ -68,7 +68,7 @@ namespace webserver {
             }
             else {
                 cout << "----------------------------" << endl << endl;
-                cout << "[Server] Socket connection failure" << endl << endl;
+                cout << "[Server] Socket connection failed" << endl << endl;
                 cout << "----------------------------" << endl << endl;
             }
         }
