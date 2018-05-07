@@ -46,6 +46,10 @@ namespace webserver {
         return method;
     }
 
+    const string& http_request::get_request_http_version() const {
+        return http_version;
+    }
+
     bool http_request::check_is_content_type_header_exists() {
         for (http_header const& current_header: headers) {
             if (current_header.type == "Content-type") {

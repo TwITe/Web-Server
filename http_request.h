@@ -53,6 +53,8 @@ namespace webserver {
 
         const string& get_request_method() const;
 
+        const string& get_request_http_version() const;
+
         bool check_is_content_type_header_exists();
     };
 }
