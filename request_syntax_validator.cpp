@@ -73,10 +73,24 @@ namespace webserver {
         return major_number != -1 && minor_number != -1;
     }
 
+    bool request_syntax_validator::check_request_line(const http_request& request) {
+        const string& current_request_method = request.get_request_method();
+        if (!check_request_method(current_request_method)) {
+            return false;
+        }
+
+        const string& current_request_http_version = request.get_request_http_version();
+        if (!check_request_http_version(current_request_http_version)) {
+            return false;
+        }
+
+        return true;
+    }
+
     bool request_syntax_validator::check_request_headers(const http_request& request) {
         const vector<http_header>& headers = request.get_headers();
 
-        for (const auto &current_header : headers) {
+        for (const auto& current_header : headers) {
             if (available_headers.find(current_header) == available_headers.end()) {
                 return false;
             }
@@ -85,18 +99,14 @@ namespace webserver {
         return true;
     }
 
-    bool request_syntax_validator::check_request_line(const http_request& request) {
-        bool method_is_valid = false;
-        const string &current_request_method = request.get_request_method();
-        if (!check_request_method(current_request_method)) {
+    bool request_syntax_validator::check_request(const http_request& request) {
+        if (!check_request_line(request)) {
             return false;
         }
 
-        const string &current_request_http_version = request.get_request_http_version();
-        if (!check_request_http_version(current_request_http_version)) {
+        if (!check_request_headers(request)) {
             return false;
         }
-
         return true;
     }
 }
