@@ -26,14 +26,31 @@ namespace webserver {
 
         return pattern;
     }
-    _Pragma("GCC diagnostic push")
-    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
-    web_handler http_router::generate_default_error_handler() {
 
-        function<webserver::http_response(webserver::http_request)> error_index_handler = [&](webserver::http_request request) {
+    web_handler http_router::generate_400_error_handler() {
+        function<webserver::http_response(webserver::http_request)> error_400_handler = [&](webserver::http_request request) {
             webserver::http_response response;
 
-            string error_message = "Oops! Something went wrong";
+            string error_message = "Bad Request";
+            response.set_response_body(error_message);
+            response.set_response_http_code(400);
+            response.set_response_length(error_message.size());
+
+            return response;
+        };
+
+        web_handler error_handler("", "", error_400_handler);
+
+        return error_handler;
+    }
+
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
+    web_handler http_router::generate_404_error_handler() {
+        function<webserver::http_response(webserver::http_request)> error_404_handler = [&](webserver::http_request request) {
+            webserver::http_response response;
+
+            string error_message = "Not Found";
             response.set_response_body(error_message);
             response.set_response_http_code(404);
             response.set_response_length(error_message.size());
@@ -41,7 +58,7 @@ namespace webserver {
             return response;
         };
 
-        web_handler error_handler("", "", error_index_handler);
+        web_handler error_handler("", "", error_404_handler);
 
         return error_handler;
     }
@@ -51,7 +68,7 @@ namespace webserver {
         // данная функция ищет нужный обработчик (web handler) для того запроса который пришел, для его
         // обработки. ищет по имеещемуся набору обработчиков
         const string& client_request_method = request.get_request_method();
-        string client_request_pattern = get_request_pattern(request);
+        const string& client_request_pattern = get_request_pattern(request);
 
         for (const auto& current_web_handler : handlers) {
             const string& current_web_handler_pattern = current_web_handler.get_web_handler_pattern();
@@ -61,6 +78,6 @@ namespace webserver {
             }
         }
 
-        return generate_default_error_handler();
+        return generate_404_error_handler();
     }
 }
