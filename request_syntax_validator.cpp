@@ -45,9 +45,11 @@ namespace webserver {
         if (request_http_version.length() < normal_http_version_min_length) {
             return false;
         }
+
         if (request_http_version.substr(0, 5) != "HTTP/") {
             return false;
         }
+
         int major_number = -1;
         int minor_number = -1;
 
@@ -62,25 +64,23 @@ namespace webserver {
                 major_number = stoi(buffer);
                 buffer.clear();
             }
-            else if (i == request_http_version.length() - 1) {
-                minor_number = stoi(buffer);
-            }
             else {
                 return false;
             }
         }
+        minor_number = stoi(buffer);
 
         return major_number != -1 && minor_number != -1;
     }
 
     bool request_syntax_validator::check_request_line(const http_request& request) {
-        const string& current_request_method = request.get_request_method();
-        if (!check_request_method(current_request_method)) {
+        const string& request_method = request.get_request_method();
+        if (!check_request_method(request_method)) {
             return false;
         }
 
-        const string& current_request_http_version = request.get_request_http_version();
-        if (!check_request_http_version(current_request_http_version)) {
+        const string& request_http_version = request.get_request_http_version();
+        if (!check_request_http_version(request_http_version)) {
             return false;
         }
 

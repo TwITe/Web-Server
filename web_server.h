@@ -37,7 +37,6 @@ namespace webserver {
 
         function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
             //TODO: создать классы для отдельных задач, множество котороых выполняет вся эта одна функция.
-                    // Использовать их в функции
             string converted_client_message(request_char_buffer);
 
             vector<string> message_fields;
@@ -91,9 +90,7 @@ namespace webserver {
                 const string& response_message_body = response.get_response_body();
 
                 converted_to_string_response += entity_content_length_header.type + ": " + entity_content_length_header.value + "\r\n";
-
                 converted_to_string_response += "\r\n";
-
                 converted_to_string_response += response_message_body;
             }
 
