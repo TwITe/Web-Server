@@ -62,46 +62,42 @@ namespace webserver {
             http_request request = parser.parse(message_fields);
 
             web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
-
             const function<http_response(http_request)>& handler = suitable_web_handler.get_transform_to_response_function();
-
             http_response response = handler(request);
 
             string response_http_version = "HTTP/1.1";
             int response_status_code = response.get_response_code();
             string response_reason_phrase = reason_phrases[response_status_code];
 
-            string response_status_line = response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase + "\n";
+            string response_status_line = response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase + "\r\n";
 
-            string converted_response;
-            converted_response += response_status_line;
+            string converted_to_string_response;
+            converted_to_string_response += response_status_line;
 
             vector<http_header> response_headers = response.get_response_headers();
 
             for (const http_header& current_header : response_headers) {
-                converted_response += current_header.type + ": " + current_header.value + "\n";
+                converted_to_string_response += current_header.type + ": " + current_header.value + "\r\n";
             }
 
             unsigned long response_body_length = response.get_content_length();
 
             bool is_response_message_body_exists = (response_body_length != 0);
-
             if (is_response_message_body_exists) {
                 http_header entity_content_length_header;
-
                 entity_content_length_header.type = "Content-Length";
                 entity_content_length_header.value = to_string(response_body_length);
 
                 const string& response_message_body = response.get_response_body();
 
-                converted_response += entity_content_length_header.type + ": " + entity_content_length_header.value + "\n";
+                converted_to_string_response += entity_content_length_header.type + ": " + entity_content_length_header.value + "\r\n";
 
-                converted_response += '\n';
+                converted_to_string_response += "\r\n";
 
-                converted_response += response_message_body + "\n";
+                converted_to_string_response += response_message_body;
             }
 
-            return converted_response;
+            return converted_to_string_response;
         };
     public:
         web_server(unsigned short int port, const vector<web_handler>& handlers);
