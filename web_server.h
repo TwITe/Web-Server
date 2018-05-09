@@ -36,24 +36,28 @@ namespace webserver {
         http_request_parser parser;
 
         function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
-            //TODO: создать классы для отдельных задач, множество котороых выполняет вся эта одна функция.
-            string converted_client_message(request_char_buffer);
+            //TODO: создать классы для отдельных задач и включить их в функцию
+            string raw_client_message(request_char_buffer);
 
             vector<string> message_fields;
             string buffer;
 
-            for (auto it = converted_client_message.begin(); it != converted_client_message.end(); it++) {
-                if (*it != '\n' && *it != '\r' && it != converted_client_message.end()) {
-                    buffer.push_back(*it);
+            for (auto it = raw_client_message.begin(); it != raw_client_message.end(); it++) {
+                if (*it == '\r' && *(it + 1) == '\n') {
+                    message_fields.emplace_back("\r\n");
+                    it+=1;
                 }
                 else {
-                    message_fields.emplace_back(buffer);
-                    buffer.clear();
+                    buffer.push_back(*it);
+                    if ((*(it + 1) == '\r' && *(it + 2) == '\n')) {
+                        message_fields.emplace_back(buffer);
+                        buffer.clear();
+                        it+=2;
+                    }
 
-                    if (it != converted_client_message.end()) {
-                        if (*(it + 1) == '\n') {
-                            ++it;
-                        }
+                    if (it + 1 == raw_client_message.end()) {
+                        message_fields.emplace_back(buffer);
+                        buffer.clear();
                     }
                 }
             }

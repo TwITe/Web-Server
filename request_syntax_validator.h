@@ -11,7 +11,7 @@ namespace webserver {
         bool check_request_line_url(const string& request_url, const http_request& request);
         bool check_request_line(const http_request& request);
 
-        set<string> available_methods;
+        set<string> available_request_methods;
     public:
         request_syntax_validator();
         bool check_request(const http_request& request, const vector<string>& raw_request);

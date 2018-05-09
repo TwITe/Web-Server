@@ -3,12 +3,12 @@
 
 namespace webserver {
     request_syntax_validator::request_syntax_validator() {
-        available_methods.insert("GET");
-        available_methods.insert("POST");
+        available_request_methods.insert("GET");
+        available_request_methods.insert("POST");
     }
 
     bool request_syntax_validator::check_request_line_method(const string &request_method) {
-        if (available_methods.find(request_method) != available_methods.end()) {
+        if (available_request_methods.find(request_method) != available_request_methods.end()) {
             return true;
         }
         return false;
