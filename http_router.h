@@ -13,7 +13,7 @@ namespace webserver {
         web_handler generate_404_error_handler();
         web_handler generate_400_error_handler();
     public:
-        web_handler get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request);
+        web_handler get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request, int error);
     };
 }
 
