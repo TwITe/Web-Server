@@ -3,12 +3,8 @@
 using namespace std;
 
 namespace webserver {
-    bool http_request_parser::check_is_current_header_host(const string& current_header) {
-        return current_header == "Host";
-    }
-
-    void http_request_parser::parse_request_line(http_request& request, const vector<string>& raw_http_request) {
-        istringstream request_line(raw_http_request[0]);
+    void http_request_parser::parse_request_line(http_request& request, const vector<string>& raw_request) {
+        istringstream request_line(raw_request[0]);
 
         string method;
         string request_url;
@@ -81,12 +77,19 @@ namespace webserver {
         }
     }
 
-    void http_request_parser::extend_request_url_by_host(const string& host, http_request& request) {
+    void http_request_parser::extend_request_url_by_host(http_request& request) {
         string full_url;
-        string url_second_part = request.get_request_url();
+        string host;
+        string resource_path = request.get_request_url();
 
-        full_url = host + url_second_part;
+        const vector<http_header> headers = request.get_headers();
+        for (auto current_header: headers) {
+            if (current_header.type == "Host") {
+                host = current_header.value;
+            }
+        }
 
+        full_url = host + resource_path;
         request.set_http_request_url(full_url);
     }
 
@@ -97,7 +100,7 @@ namespace webserver {
         // это снова (parse_request_body и parse_headers). Придумать что то другой, возможно, общий парсер
         for (auto current_message_line = raw_http_request.begin();
              current_message_line != raw_http_request.end(); current_message_line++) {
-            if (*current_message_line == " ") {
+            if (*current_message_line == "\r\n") {
                 request.set_http_request_body(*(current_message_line + 1));
             }
         }
@@ -113,54 +116,70 @@ namespace webserver {
     }
 
     void http_request_parser::parse_headers(http_request& request, const vector<string>& raw_http_request) {
-        // TODO: узнать, зачем тут надо было делать raw_http_request.begin() + 1. Зачем надо увеличивать на +1.
+        string headers_and_body_delimiter = "\r\n";
+
+        //парсинг начинается со второй строчки, где и начинаются хэдеры
         for (auto current_message_line = raw_http_request.begin() + 1;
              current_message_line != raw_http_request.end(); current_message_line++) {
-            string current_header_type;
-            string current_header_value;
-
-            // TODO: переделать эту проверку, непонятно что за строка
-            if (*current_message_line == " ") {
+            // начало request body
+            if (*current_message_line == headers_and_body_delimiter) {
                 break;
             }
 
-            for (size_t current_char_postion = 0; current_char_postion < current_message_line->size(); current_char_postion++) {
-                // если встретился знак :, значит далее идет значение данного хэдера
+            string current_header_type;
+            string current_header_value;
+
+            for (size_t current_char_postion = 0;
+                 current_char_postion < current_message_line->size(); current_char_postion++) {
+                // если встретился знак ':', значит далее идет value
                 if ((*current_message_line)[current_char_postion] == ':') {
-                    current_header_value = current_message_line->substr(current_char_postion + 2);
-                    break;
+                    size_t value_start_position = current_char_postion + 2;
+                    current_header_value = current_message_line->substr(value_start_position);
                 }
                 // иначе дальше записываем тип хэдера
-                current_header_type.push_back((*current_message_line)[current_char_postion]);
+                else {
+                    current_header_type.push_back((*current_message_line)[current_char_postion]);
+                }
             }
 
             http_header current_header;
             current_header.type = current_header_type;
             current_header.value = current_header_value;
-
             request.add_http_request_header(current_header);
-
-            if (check_is_current_header_host(current_header_type)) {
-                extend_request_url_by_host(current_header_value, request);
-            }
         }
     }
 
-    http_request http_request_parser::parse(vector<string>& raw_http_request) {
+    bool check_is_content_type_header_exists(const http_request& request) {
+        const vector<http_header>& headers = request.get_headers();
+
+        for (const http_header& current_header: headers) {
+            if (current_header.type == "Content-type") {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    http_request http_request_parser::parse_request(vector<string> &raw_request) {
         http_request request;
 
-        parse_request_line(request, raw_http_request);
+        parse_request_line(request, raw_request);
         parse_url_to_parameters(request);
-        parse_headers(request, raw_http_request);
-        parse_request_body(request, raw_http_request);
+        parse_headers(request, raw_request);
+        parse_request_body(request, raw_request);
 
         string request_body = request.get_request_body();
 
         if (!request_body.empty()) {
-            // эта функция проверяет наличие content_type_header, если его нет, то добавляет дефолтный
-            if (!request.check_is_content_type_header_exists()) {
+            // эта функция проверяет наличие content_type header, если его нет, то добавляет дефолтный
+            if (!check_is_content_type_header_exists(request)) {
                 add_content_type_default_header(request);
             }
+        }
+
+        const string& request_url = request.get_request_url();
+        if (request_url[0] == '/') {
+            extend_request_url_by_host(request);
         }
 
         return request;
