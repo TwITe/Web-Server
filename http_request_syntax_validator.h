@@ -1,10 +1,11 @@
-#ifndef WEB_REQUEST_SYNTAX_VALIDATOR_H
-#define WEB_REQUEST_SYNTAX_VALIDATOR_H
+#ifndef WEB_HTTP_REQUEST_SYNTAX_VALIDATOR_H
+#define WEB_HTTP_REQUEST_SYNTAX_VALIDATOR_H
 
 #include "http_request.h"
+#include <set>
 
 namespace webserver {
-    class request_syntax_validator {
+    class http_request_syntax_validator {
     private:
         bool check_request_line_method(const string &request_method);
         bool check_request_line_http_version(const string &request_http_version);
@@ -13,9 +14,9 @@ namespace webserver {
 
         set<string> available_request_methods;
     public:
-        request_syntax_validator();
+        http_request_syntax_validator();
         bool check_request(const http_request& request, const vector<string>& raw_request);
     };
 }
 
-#endif //WEB_REQUEST_SYNTAX_VALIDATOR_H
+#endif //WEB_HTTP_REQUEST_SYNTAX_VALIDATOR_H
