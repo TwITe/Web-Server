@@ -27,6 +27,8 @@ namespace webserver {
         return pattern;
     }
 
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
     web_handler http_router::generate_400_error_handler() {
         function<webserver::http_response(webserver::http_request)> error_400_handler = [&](webserver::http_request request) {
             webserver::http_response response;
@@ -44,8 +46,6 @@ namespace webserver {
         return error_handler;
     }
 
-    _Pragma("GCC diagnostic push")
-    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
     web_handler http_router::generate_404_error_handler() {
         function<webserver::http_response(webserver::http_request)> error_404_handler = [&](webserver::http_request request) {
             webserver::http_response response;

@@ -58,7 +58,7 @@ namespace webserver {
                 }
             }
 
-            http_request request = parser.parse(message_fields);
+            http_request request = parser.parse_request(message_fields);
 
             web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
             const function<http_response(http_request)>& handler = suitable_web_handler.get_transform_to_response_function();
