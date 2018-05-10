@@ -25,4 +25,4 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
 #        serverclient tests
 #        ------------------
         web_server_client_tests.cpp
-        http_request_syntax_validator.cpp http_request_syntax_validator.h http_response_builder.cpp http_response_builder.h)
+        http_request_validator.cpp http_request_validator.h http_response_builder.cpp http_response_builder.h)
