@@ -64,11 +64,7 @@ namespace webserver {
     }
     _Pragma("GCC diagnostic pop")
 
-    web_handler http_router::get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request, int error) {
-        if (error == 400) {
-            return generate_400_error_handler();
-        }
-
+    web_handler http_router::get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request) {
         const string& client_request_method = request.get_request_method();
         const string& client_request_pattern = get_request_pattern(request);
 
