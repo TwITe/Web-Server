@@ -10,7 +10,6 @@
 #include <map>
 
 namespace webserver {
-    //TODO: 1) выяснить, стоит ли делать этот класс 2) если да, можно ли переноситт сюда reason_phrases из класса web_server
     class http_response_builder {
     private:
         map<int, string> reason_phrases;

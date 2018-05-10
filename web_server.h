@@ -9,7 +9,7 @@
 #include "tcp_server.h"
 #include "web_handler.h"
 #include "http_router.h"
-#include "http_request_syntax_validator.h"
+#include "http_request_validator.h"
 #include "http_response_builder.h"
 #include <map>
 
@@ -35,7 +35,7 @@ namespace webserver {
 
         http_request_parser parser;
 
-        http_request_syntax_validator request_syntax_validator;
+        http_request_validator request_syntax_validator;
 
         http_response_builder response_builder;
 

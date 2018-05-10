@@ -94,10 +94,6 @@ namespace webserver {
     }
 
     void http_request_parser::parse_request_body(http_request& request, const vector<string>& raw_http_request) {
-        //TODO: у меня эти 2 класса работают неэффективно
-        //сначала один проходит весь реквест от начала до конца, пока не встретит пустую строку
-        // (вспомнил, пустая строка, это кажется если дальше идет request_body), а потом эта функция делает
-        // это снова (parse_request_body и parse_headers). Придумать что то другой, возможно, общий парсер
         for (auto current_message_line = raw_http_request.begin();
              current_message_line != raw_http_request.end(); current_message_line++) {
             if (*current_message_line == "\r\n") {

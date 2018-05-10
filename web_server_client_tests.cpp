@@ -2,7 +2,7 @@
 #include "catch.hpp"
 using namespace std;
 
-//TODO: Добавить тест по отправлению пустой строки. Должен придти 400 (bad request) response
+//TODO: Добавить тест по отправлению пустой строки. Должен прийти 400 (bad request) response
 
 void open_connection(unsigned short int PORT, int& sockfd, struct sockaddr_in& server_address) {
     server_address = {};
@@ -71,5 +71,4 @@ TEST_CASE("Get 400 response for bad request","") {
     int sockfd;
     struct sockaddr_in server_address;
     open_connection(PORT, sockfd, server_address);
-
 }
