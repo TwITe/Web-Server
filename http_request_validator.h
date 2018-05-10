@@ -5,7 +5,8 @@
 #include <set>
 
 namespace webserver {
-    class http_request_syntax_validator {
+    //TODO: написать тесты на валидатор
+    class http_request_validator {
     private:
         bool check_request_line_method(const string &request_method);
         bool check_request_line_http_version(const string &request_http_version);
@@ -14,7 +15,7 @@ namespace webserver {
 
         set<string> available_request_methods;
     public:
-        http_request_syntax_validator();
+        http_request_validator();
         bool check_request(const http_request& request, const vector<string>& raw_request);
     };
 }

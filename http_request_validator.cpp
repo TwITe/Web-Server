@@ -1,13 +1,13 @@
 #include <set>
-#include "http_request_syntax_validator.h"
+#include "http_request_validator.h"
 
 namespace webserver {
-    http_request_syntax_validator::http_request_syntax_validator() {
+    http_request_validator::http_request_validator() {
         available_request_methods.insert("GET");
         available_request_methods.insert("POST");
     }
 
-    bool http_request_syntax_validator::check_request_line_method(const string &request_method) {
+    bool http_request_validator::check_request_line_method(const string &request_method) {
         //TODO: проверить что делать если метод неправильный (присылать 501 или нет в ответ)
         if (available_request_methods.find(request_method) != available_request_methods.end()) {
             return true;
@@ -15,7 +15,7 @@ namespace webserver {
         return false;
     }
 
-    bool http_request_syntax_validator::check_request_line_url(const string& request_url, const http_request& request) {
+    bool http_request_validator::check_request_line_url(const string& request_url, const http_request& request) {
         if (request_url[0] == '/') {
             //TODO: выяснить, где проверять этот пункт
             //   1. If Request-URI is an absoluteURI, the host is part of the
@@ -43,7 +43,7 @@ namespace webserver {
         return false;
     }
 
-    bool http_request_syntax_validator::check_request_line_http_version(const string &request_http_version) {
+    bool http_request_validator::check_request_line_http_version(const string &request_http_version) {
         unsigned long default_http_version_min_length = 8;
         if (request_http_version.length() < default_http_version_min_length) {
             return false;
@@ -76,7 +76,7 @@ namespace webserver {
         return major_number != -1 && minor_number != -1;
     }
 
-    bool http_request_syntax_validator::check_request_line(const http_request& request) {
+    bool http_request_validator::check_request_line(const http_request& request) {
         const string& request_method = request.get_request_method();
         if (!check_request_line_method(request_method)) {
             return false;
@@ -95,7 +95,7 @@ namespace webserver {
         return true;
     }
 
-    bool http_request_syntax_validator::check_request(const http_request& request, const vector<string>& raw_request) {
+    bool http_request_validator::check_request(const http_request& request, const vector<string>& raw_request) {
         //TODO: сделать проверку request line на лишние символы
         if (!check_request_line(request)) {
             return false;
