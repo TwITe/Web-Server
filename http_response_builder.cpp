@@ -48,39 +48,55 @@ namespace webserver {
         reason_phrases[505] = "HTTP Version not supported";
     }
 
-    string http_response_builder::build_response(const webserver::web_handler &request_handler, const http_request& request) {
-        const function<http_response(http_request)>& handler = request_handler.get_transform_to_response_function();
-
-        http_response response = handler(request);
-
+    string http_response_builder::build_response_status_line(const webserver::http_response& response) {
         string response_http_version = "HTTP/1.1";
         int response_status_code = response.get_response_code();
         string response_reason_phrase = reason_phrases[response_status_code];
 
         string response_status_line = response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase + "\r\n";
 
-        string converted_to_string_response;
-        converted_to_string_response += response_status_line;
+        return response_status_line;
+    }
 
+    void http_response_builder::add_response_status_line(const http_response& response, string& converted_to_string_response) {
+        converted_to_string_response += build_response_status_line(response);
+    }
+
+    void http_response_builder::add_header_fields(const http_response& response, string& converted_to_string_response) {
         vector<http_header> response_headers = response.get_response_headers();
 
         for (const http_header& current_header : response_headers) {
             converted_to_string_response += current_header.type + ": " + current_header.value + "\r\n";
         }
+    }
 
+    void http_response_builder::add_response_body(const http_response& response, string& converted_to_string_response) {
         unsigned long response_body_length = response.get_content_length();
 
+        http_header content_length_header;
+        content_length_header.type = "Content-Length";
+        content_length_header.value = to_string(response_body_length);
+
+        const string& response_message_body = response.get_response_body();
+
+        converted_to_string_response += content_length_header.type + ": " + content_length_header.value + "\r\n";
+        converted_to_string_response += "\r\n";
+        converted_to_string_response += response_message_body;
+    }
+
+    string http_response_builder::build_response(const webserver::web_handler &request_handler, const http_request& request) {
+        const function<http_response(http_request)>& handler = request_handler.get_transform_to_response_function();
+
+        http_response response = handler(request);
+
+        string converted_to_string_response;
+
+        add_response_status_line(response, converted_to_string_response);
+
+        unsigned long response_body_length = response.get_content_length();
         bool is_response_message_body_exists = (response_body_length != 0);
         if (is_response_message_body_exists) {
-            http_header content_length_header;
-            content_length_header.type = "Content-Length";
-            content_length_header.value = to_string(response_body_length);
-
-            const string& response_message_body = response.get_response_body();
-
-            converted_to_string_response += content_length_header.type + ": " + content_length_header.value + "\r\n";
-            converted_to_string_response += "\r\n";
-            converted_to_string_response += response_message_body;
+            add_response_body(response, converted_to_string_response);
         }
 
         return converted_to_string_response;
