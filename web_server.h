@@ -39,6 +39,8 @@ namespace webserver {
 
         http_response_builder response_builder;
 
+        http_response generate_400_error_response(const http_request& request);
+
         function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
             string raw_client_message(request_char_buffer);
 
@@ -69,14 +71,18 @@ namespace webserver {
 
             int error = 0;
 
-            if (!request_syntax_validator.check_request(request, message_fields)) {
-                error = 400;
+            http_response response;
+
+            if (!request_syntax_validator.check_request(request)) {
+                response = generate_400_error_response(request);
+            } else {
+                web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
+                const function<http_response(http_request)>& handler = suitable_web_handler.get_transform_to_response_function();
+
+                response = handler(request);
             }
 
-            web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request, error);
-
-            string server_response = response_builder.build_response(suitable_web_handler, request);
-
+            string server_response = response_builder.build_response(response);
             return server_response;
         };
     public:

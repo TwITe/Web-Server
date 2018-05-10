@@ -3,6 +3,26 @@
 namespace webserver {
     web_server::web_server(unsigned short int port, const vector<web_handler>& handlers) : handlers(handlers), server(port, convert_client_message) {}
 
+    http_response web_server::generate_400_error_response(const http_request& request) {
+        function<webserver::http_response(webserver::http_request)> error_404_handler = [&](webserver::http_request request) {
+            webserver::http_response response;
+
+            string error_message = "Not Found";
+            response.set_response_body(error_message);
+            response.set_response_http_code(404);
+            response.set_response_length(error_message.size());
+
+            return response;
+        };
+
+        web_handler error_handler("", "", error_404_handler);
+
+        const function<http_response(http_request)>& handler = error_handler.get_transform_to_response_function();
+
+        http_response response = handler(request);
+        return response;
+    }
+
     //Запуск web-server.
     //Функция должна блокировать поток, в котором она была запущена, чтобы веб-сервер не прекращал работу мгновенно.
     void web_server::start() {
