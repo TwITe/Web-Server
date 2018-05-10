@@ -16,7 +16,7 @@ namespace webserver {
         set<string> available_request_methods;
     public:
         http_request_validator();
-        bool check_request(const http_request& request, const vector<string>& raw_request);
+        bool check_request(const http_request& request);
     };
 }
 

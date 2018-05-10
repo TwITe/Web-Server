@@ -62,7 +62,8 @@ namespace webserver {
         converted_to_string_response += build_response_status_line(response);
     }
 
-    void http_response_builder::add_header_fields(const http_response& response, string& converted_to_string_response) {
+    void http_response_builder::add_response_header_fields(const http_response &response,
+                                                           string &converted_to_string_response) {
         vector<http_header> response_headers = response.get_response_headers();
 
         for (const http_header& current_header : response_headers) {
@@ -84,14 +85,11 @@ namespace webserver {
         converted_to_string_response += response_message_body;
     }
 
-    string http_response_builder::build_response(const webserver::web_handler &request_handler, const http_request& request) {
-        const function<http_response(http_request)>& handler = request_handler.get_transform_to_response_function();
-
-        http_response response = handler(request);
-
+    string http_response_builder::build_response(const http_response& response) {
         string converted_to_string_response;
 
         add_response_status_line(response, converted_to_string_response);
+        add_response_header_fields(response, converted_to_string_response);
 
         unsigned long response_body_length = response.get_content_length();
         bool is_response_message_body_exists = (response_body_length != 0);

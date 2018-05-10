@@ -95,7 +95,7 @@ namespace webserver {
         return true;
     }
 
-    bool http_request_validator::check_request(const http_request& request, const vector<string>& raw_request) {
+    bool http_request_validator::check_request(const http_request& request) {
         //TODO: сделать проверку request line на лишние символы
         if (!check_request_line(request)) {
             return false;

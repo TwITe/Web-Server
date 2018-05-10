@@ -18,13 +18,13 @@ namespace webserver {
 
         void add_response_status_line(const http_response& response, string& converted_to_string_response);
 
-        void add_header_fields(const http_response& response, string& converted_to_string_response);
+        void add_response_header_fields(const http_response &response, string &converted_to_string_response);
 
         void add_response_body(const http_response& response, string& converted_to_string_response);
     public:
         http_response_builder();
 
-        string build_response(const web_handler& request_handler, const http_request& request);
+        string build_response(const http_response& response);
     };
 }
 
