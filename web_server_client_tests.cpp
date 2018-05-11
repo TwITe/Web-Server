@@ -67,6 +67,7 @@ TEST_CASE("Get 404 response for request with non-existing web handler","Client")
 }
 
 TEST_CASE("Get 400 response for bad request","") {
+    //TODO: дописать тесты
     unsigned short int PORT = 8080;
     int sockfd;
     struct sockaddr_in server_address;

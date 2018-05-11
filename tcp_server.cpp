@@ -11,6 +11,7 @@ namespace webserver {
 
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(PORT);
+        //TODO: сделать, чтобы работало со всеми ip, которые задает программист
         if (inet_aton("127.0.0.1", &server_address.sin_addr) == 0) {
             throw runtime_error("[Server] Invalid IP address");
         }
