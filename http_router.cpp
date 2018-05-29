@@ -29,23 +29,6 @@ namespace webserver {
 
     _Pragma("GCC diagnostic push")
     _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
-    web_handler http_router::generate_400_error_handler() {
-        function<webserver::http_response(webserver::http_request)> error_400_handler = [&](webserver::http_request request) {
-            webserver::http_response response;
-
-            string error_message = "Bad Request";
-            response.set_response_body(error_message);
-            response.set_response_http_code(400);
-            response.set_response_length(error_message.size());
-
-            return response;
-        };
-
-        web_handler error_handler("", "", error_400_handler);
-
-        return error_handler;
-    }
-
     web_handler http_router::generate_404_error_handler() {
         function<webserver::http_response(webserver::http_request)> error_404_handler = [&](webserver::http_request request) {
             webserver::http_response response;
@@ -63,6 +46,7 @@ namespace webserver {
         return error_handler;
     }
     _Pragma("GCC diagnostic pop")
+
 
     web_handler http_router::get_suitable_request_handler(const vector<web_handler>& handlers, const http_request& request) {
         const string& client_request_method = request.get_request_method();
