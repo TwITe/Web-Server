@@ -35,10 +35,10 @@ TEST_CASE("Get Proper Suitable Web Handler", "HTTP Router") {
     webserver::http_router test_router;
     webserver::web_handler received_web_handler = test_router.get_suitable_request_handler(handlers, test_request);
 
-
     const string& received_web_handler_method = received_web_handler.get_web_handler_method();
-    const string& proper_web_handler_method = proper_web_handler.get_web_handler_method();
     const string& received_web_handler_pattern = received_web_handler.get_web_handler_pattern();
+
+    const string& proper_web_handler_method = proper_web_handler.get_web_handler_method();
     const string& proper_web_handler_pattern = proper_web_handler.get_web_handler_pattern();
 
     REQUIRE(received_web_handler_method == proper_web_handler_method);
@@ -76,17 +76,17 @@ TEST_CASE("Non-existing Handler: Get Error Handler", "HTTP Router") {
     test_request.set_http_request_url("https://vk.com/im");
 
     webserver::http_router test_router;
+
     webserver::web_handler received_web_handler = test_router.get_suitable_request_handler(handlers, test_request);
 
     const string& received_web_handler_method = received_web_handler.get_web_handler_method();
     const string& received_web_handler_pattern = received_web_handler.get_web_handler_pattern();
 
-
-    webserver::request_to_response_transform_handler request_transform_handler;
-    webserver::http_response transformed_response = request_transform_handler.transform_request_to_response(received_web_handler, test_request);
-    const string& incorrect_response_body = transformed_response.get_response_body();
+    const function<webserver::http_response(webserver::http_request)>& handler = received_web_handler.get_transform_to_response_function();
+    webserver::http_response transformed_response = handler(test_request);
+    const string& response_body = transformed_response.get_response_body();
 
     REQUIRE(received_web_handler_method.empty());
     REQUIRE(received_web_handler_pattern.empty());
-    REQUIRE(incorrect_response_body == "Oops! Something went wrong");
+    REQUIRE(response_body == "Not Found");
 }
