@@ -27,7 +27,7 @@ namespace webserver {
     }
 
     string http_request_parser::shrink_url_to_parameters(const string& url) {
-        string shrinked_url = url.substr(url.find('?'));;
+        string shrinked_url = url.substr(url.find('?') + 1);;
         return shrinked_url;
     }
 
@@ -37,8 +37,10 @@ namespace webserver {
         string parameter_name;
         string parameter_value;
 
+        char request_parameters_delimiter = '&';
+
         for (unsigned long current_char_position = 0; current_char_position < request_parameters.size(); current_char_position++) {
-            if (request_parameters[current_char_position] == '&' || current_char_position == request_parameters.size() - 1) {
+            if (request_parameters[current_char_position] == request_parameters_delimiter) {
                 parameter_name_appeared = true;
 
                 request_param current_request_parameter;
@@ -66,6 +68,13 @@ namespace webserver {
                 parameter_value.push_back(request_parameters[current_char_position]);
             }
         }
+
+        request_param current_request_parameter;
+
+        current_request_parameter.name = parameter_name;
+        current_request_parameter.value = parameter_value;
+
+        request.add_http_request_param(current_request_parameter);
     }
 
     void http_request_parser::parse_url_to_parameters(http_request& request) {
@@ -86,6 +95,7 @@ namespace webserver {
         for (auto current_header: headers) {
             if (current_header.type == "Host") {
                 host = current_header.value;
+                break;
             }
         }
 
@@ -95,10 +105,11 @@ namespace webserver {
 
     void http_request_parser::parse_request_body(http_request& request, const vector<string>& raw_http_request) {
         for (auto current_message_line = raw_http_request.begin(); current_message_line != raw_http_request.end(); current_message_line++) {
-            if (*current_message_line == "\r\n" && current_message_line != raw_http_request.end()) {
+            if (*current_message_line == "\r\n" && current_message_line + 1 != raw_http_request.end()) {
                 request.set_http_request_body(*(current_message_line + 1));
             }
         }
+        string ds = request.get_request_body();
     }
 
     void http_request_parser::parse_headers(http_request& request, const vector<string>& raw_http_request) {
