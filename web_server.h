@@ -69,8 +69,6 @@ namespace webserver {
 
             http_request request = parser.parse_request(message_fields);
 
-            int error = 0;
-
             http_response response;
 
             if (!request_syntax_validator.check_request(request)) {

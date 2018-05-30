@@ -4,6 +4,8 @@ namespace webserver {
     web_server::web_server(unsigned short int port, const vector<web_handler>& handlers) : handlers(handlers), server(port, convert_client_message) {}
 
     http_response web_server::generate_400_error_response(const http_request& request) {
+        _Pragma("GCC diagnostic push")
+        _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
         function<webserver::http_response(webserver::http_request)> error_404_handler = [&](webserver::http_request request) {
             webserver::http_response response;
 
@@ -14,6 +16,7 @@ namespace webserver {
 
             return response;
         };
+        _Pragma("GCC diagnostic pop")
 
         web_handler error_handler("", "", error_404_handler);
 

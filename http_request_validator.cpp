@@ -8,7 +8,7 @@ namespace webserver {
     }
 
     bool http_request_validator::check_request_line_method(const string &request_method) {
-        //TODO: проверить что делать если метод неправильный (присылать 501 или нет в ответ)
+        //TODO: сделать отправление ошибки 501 на неправильный метод (например, GETT вместо GET)
         if (available_request_methods.find(request_method) != available_request_methods.end()) {
             return true;
         }
@@ -96,7 +96,7 @@ namespace webserver {
     }
 
     bool http_request_validator::check_request(const http_request& request) {
-        //TODO: сделать проверку request line на лишние символы
+        //TODO: сделать проверку request line на лишние символы, как сделать если передавать нельзя raw строку
         if (!check_request_line(request)) {
             return false;
         }
