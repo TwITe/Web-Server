@@ -1,5 +1,5 @@
 #include "http_request_parser.h"
-#include <sstream>
+
 using namespace std;
 
 namespace webserver {
@@ -39,8 +39,8 @@ namespace webserver {
 
         char request_parameters_delimiter = '&';
 
-        for (unsigned long current_char_position = 0; current_char_position < request_parameters.size(); current_char_position++) {
-            if (request_parameters[current_char_position] == request_parameters_delimiter) {
+        for (char current_char : request_parameters) {
+            if (current_char == request_parameters_delimiter) {
                 parameter_name_appeared = true;
 
                 request_param current_request_parameter;
@@ -56,16 +56,16 @@ namespace webserver {
                 continue;
             }
 
-            if (request_parameters[current_char_position] == '=') {
+            if (current_char == '=') {
                 parameter_name_appeared = false;
                 continue;
             }
 
             if (parameter_name_appeared) {
-                parameter_name.push_back(request_parameters[current_char_position]);
+                parameter_name.push_back(current_char);
             }
             else {
-                parameter_value.push_back(request_parameters[current_char_position]);
+                parameter_value.push_back(current_char);
             }
         }
 
@@ -103,15 +103,6 @@ namespace webserver {
         request.set_http_request_url(full_url);
     }
 
-    void http_request_parser::parse_request_body(http_request& request, const vector<string>& raw_http_request) {
-        for (auto current_message_line = raw_http_request.begin(); current_message_line != raw_http_request.end(); current_message_line++) {
-            if (*current_message_line == "\r\n" && current_message_line + 1 != raw_http_request.end()) {
-                request.set_http_request_body(*(current_message_line + 1));
-            }
-        }
-        string ds = request.get_request_body();
-    }
-
     void http_request_parser::parse_headers(http_request& request, const vector<string>& raw_http_request) {
         string headers_and_body_delimiter = "\r\n";
         char header_type_and_value_delimiter = ':';
@@ -140,21 +131,75 @@ namespace webserver {
         }
     }
 
-    http_request http_request_parser::parse_request(vector<string> &raw_request) {
+    bool http_request_parser::check_if_request_url_is_absolute_path(const string& request_url) {
+        return request_url[0] == '/';
+    }
+
+    http_request http_request_parser::parse_request(const vector<string> &raw_request) {
         http_request request;
 
         parse_request_line(request, raw_request);
         parse_url_to_parameters(request);
         parse_headers(request, raw_request);
-        parse_request_body(request, raw_request);
 
-        string request_body = request.get_request_body();
-
-        const string& request_url = request.get_request_url();
-        if (request_url[0] == '/') {
+        if (check_if_request_url_is_absolute_path) {
             extend_request_url_by_host(request);
         }
 
+        if (request.get_request_method() == "POST") {
+            post_parser.parse_post_request(request, raw_request);
+        }
+
         return request;
+    }
+
+    http_request_parser::ContentType http_request_parser::parse_content_type_header(const http_header& content_type_header) {
+        ContentType contentType;
+
+        string content_type = content_type_header.value;
+
+        size_t index = content_type.find(';');
+
+        string type = (index != string::npos) ? content_type.substr(0, index) : content_type;
+
+        contentType.type = type;
+
+        //parse parameters
+        if (index != string::npos) {
+            string key;
+            string value;
+            string parameter;
+
+            char key_value_delimiter = '=';
+
+            size_t begin_of_parameter = index;
+            size_t end_of_parameter;
+
+            while ((index = content_type.find(';', index)) != string::npos) {
+
+                end_of_parameter = index;
+                parameter = content_type.substr(begin_of_parameter, end_of_parameter);
+
+                key = parameter.substr(0, parameter.find(key_value_delimiter));
+                value = parameter.substr(parameter.find(key_value_delimiter) + 1);
+
+                //remove quotes
+                if (value[0] == '"') {
+                    value = value.substr(1, value.length() - 2);
+                }
+
+                contentType.parameters.emplace(key, value);
+
+                begin_of_parameter = end_of_parameter + 1;
+            }
+
+            parameter = content_type.substr(begin_of_parameter);
+            key = parameter.substr(0, parameter.find(key_value_delimiter));
+            value = parameter.substr(parameter.find(key_value_delimiter));
+
+            contentType.parameters.emplace(key, value);
+        }
+
+        return contentType;
     }
 }
