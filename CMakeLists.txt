@@ -27,4 +27,4 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
 #        serverclient tests
 #        ------------------
 #         web_server_client_tests.cpp
-        )
+        http_request_parser_post.cpp http_request_parser_post.h http_request_parser_post_tests.cpp)
