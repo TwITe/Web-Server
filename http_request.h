@@ -4,6 +4,8 @@
 #include "http_header.h"
 #include "request_param.h"
 #include <vector>
+#include <map>
+
 using namespace std;
 
 namespace webserver {
@@ -20,7 +22,7 @@ namespace webserver {
 
         //тело запроса в кодировке, определенной в заголовке Content-Type. По умолчанию - utf-8
         //Тело может отсутствовать, например, если был GET запрос
-        string request_body;
+        map<string, string> request_body;
 
         //URL запроса. Например, http://localhost:8083/comand?param=1&param2=2
         string url;
@@ -37,7 +39,7 @@ namespace webserver {
 
         void set_http_version(const string& client_http_version);
 
-        void set_http_request_body(const string& client_request_body);
+        void add_request_body_field(const string& name, const string& value);
 
         void add_http_request_param(request_param& client_request_param);
 
@@ -45,9 +47,11 @@ namespace webserver {
 
         const vector<http_header>& get_headers() const;
 
+        const http_header& get_header(const string& header_name);
+
         const vector<request_param> get_request_params() const;
 
-        const string& get_request_body() const;
+        const map<string, string>& get_request_body() const;
 
         const string& get_request_url() const;
 
