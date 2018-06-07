@@ -14,10 +14,6 @@ namespace webserver {
         http_version = client_http_version;
     }
 
-//    void http_request::set_http_request_body(const string& client_request_body) {
-//        request_body = client_request_body;
-//    }
-
     void http_request::add_http_request_param(request_param& client_request_param) {
         request_params.push_back(client_request_param);
     }
@@ -60,5 +56,7 @@ namespace webserver {
                 return current_header;
             }
         }
+        http_header* error_header = new http_header{"af", "ad"};
+        return *error_header;
     }
 }
