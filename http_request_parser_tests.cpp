@@ -58,7 +58,7 @@ TEST_CASE("ParseRequestLine_RawRequest_ParsedRequestLine") {
 TEST_CASE("ParseUrlencodedRequestBody_RawUrlencodedBody_ParsedUrlencodedBody", "Parser") {
     vector<string> raw_request;
 
-    string request_body = "say=Hi&to=Mom\r\n";
+    string request_body = "say=Hi&to=Mom";
     raw_request.emplace_back("POST / HTTP/1.1\r\n");
     raw_request.emplace_back("Host: foo.com\r\n");
     raw_request.emplace_back("Content-Type: application/x-www-form-urlencoded; charset=\"utf-8\"\r\n");
@@ -77,7 +77,7 @@ TEST_CASE("ParseUrlencodedRequestBody_RawUrlencodedBody_ParsedUrlencodedBody", "
     REQUIRE(proper_request.get_request_body() == received_request.get_request_body());
 }
 
-TEST_CASE("ParseFormDataRequestBody_RawFormDataBody_ParsedFormDataBody", "Parser") {
+TEST_CASE("ParseFormDataRequestBody_RawFormDataBodyw/EndBoundary_ParsedFormDataBody", "Parser") {
     vector<string> raw_request;
 
     string request_body = "--boundary\r\n"
@@ -90,9 +90,38 @@ TEST_CASE("ParseFormDataRequestBody_RawFormDataBody_ParsedFormDataBody", "Parser
                           "value2\r\n"
                           "--boundary--";
 
-    raw_request.emplace_back("POST /test.html HTTP/1.1");
-    raw_request.emplace_back("Host: example.org");
-    raw_request.emplace_back("Content-Type: multipart/form-data;boundary=\"boundary\"");
+    raw_request.emplace_back("POST /test.html HTTP/1.1\r\n");
+    raw_request.emplace_back("Host: example.org\r\n");
+    raw_request.emplace_back("Content-Type: multipart/form-data;boundary=\"boundary\"\r\n");
+    raw_request.emplace_back("\r\n");
+    raw_request.emplace_back(request_body);
+
+    webserver::http_request proper_request;
+
+    proper_request.add_request_body_field("field1", "value1");
+    proper_request.add_request_body_field("field2", "value2");
+
+    webserver::http_request_parser parser;
+    webserver::http_request received_request = parser.parse_request(raw_request);
+
+    REQUIRE(proper_request.get_request_body() == received_request.get_request_body());
+}
+
+TEST_CASE("ParseFormDataRequestBody_RawFormDataBodyw/oEndBoundary_ParsedFormDataBody", "Parser") {
+    vector<string> raw_request;
+
+    string request_body = "--boundary\r\n"
+                          "Content-Disposition: form-data; name=\"field1\"\r\n"
+                          "\r\n"
+                          "value1\r\n"
+                          "--boundary\r\n"
+                          "Content-Disposition: form-data; name=\"field2\"; filename=\"example.txt\"\r\n"
+                          "\r\n"
+                          "value2";
+
+    raw_request.emplace_back("POST /test.html HTTP/1.1\r\n");
+    raw_request.emplace_back("Host: example.org\r\n");
+    raw_request.emplace_back("Content-Type: multipart/form-data;boundary=\"boundary\"\r\n");
     raw_request.emplace_back("\r\n");
     raw_request.emplace_back(request_body);
 

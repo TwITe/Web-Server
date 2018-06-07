@@ -150,6 +150,8 @@ namespace webserver {
         }
 
         body = raw_request[index_start_of_body];
+        //add "\r\n" for correct spliting the body
+        body += "\r\n";
 
         string token;
         istringstream iss(body);
@@ -198,6 +200,147 @@ namespace webserver {
         }
 
         post_request.add_request_body_field(key, value);
+    }
+
+
+
+    bool http_request_parser::check_if_current_request_body_line_is_end_boundary(const string &line, const string &boundary) {
+        return line.find("--" + boundary + "--") == 0;
+    }
+
+    bool http_request_parser::check_if_current_request_body_line_is_boundary(const string &line, const string& boundary) {
+        return line.find("--" + boundary) == 0;
+    }
+
+    void http_request_parser::parse_formdata_body(http_request &post_request, const vector<string> &raw_request_body, const string& boundary) {
+        string key;
+        string value;
+
+        for (auto current_line = raw_request_body.begin(); current_line != raw_request_body.end(); current_line++) {
+            if (check_if_current_request_body_line_is_end_boundary(*current_line, boundary)) {
+                break;
+            }
+
+            if (check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
+                current_line++;
+                content_disposition current_body_subpart_content_disposition = parse_content_disposition_header(*current_line);
+
+                key = current_body_subpart_content_disposition.parameters["name"];
+
+                current_line++;
+
+                while(*current_line == "\r\n") {
+                    current_line++;
+                }
+
+                while (!check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
+                    value += *current_line;
+
+                    if (current_line + 1 != raw_request_body.end() && !check_if_current_request_body_line_is_boundary(*(current_line + 1), boundary)) {
+                        current_line++;
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                post_request.add_request_body_field(key, value);
+
+                key.clear();
+                value.clear();
+            }
+        }
+    }
+
+    void http_request_parser::parse_post_request(http_request& post_request, const vector<string> &raw_request) {
+        const vector<string>& raw_request_body = get_raw_request_body(raw_request);
+
+        content_type obj = parse_content_type_header(post_request.get_header("Content-Type").value);
+
+        if (obj.type == "application/x-www-form-urlencoded") {
+            parse_urlencoded_body(post_request, raw_request_body);
+        }
+        else {
+            parse_formdata_body(post_request, raw_request_body, obj.parameters["boundary"]);
+        }
+    }
+
+    http_request http_request_parser::parse_request(const vector<string> &raw_request) {
+        http_request request;
+
+        parse_request_line(request, raw_request);
+        parse_url_to_parameters(request);
+        parse_headers(request, raw_request);
+
+        const string& url = request.get_request_url();
+        if (check_if_request_url_is_absolute_path(url)) {
+            extend_request_url_by_host(request);
+        }
+
+        if (request.get_request_method() == "POST") {
+            parse_post_request(request, raw_request);
+        }
+
+        return request;
+    }
+
+    http_request_parser::content_type http_request_parser::parse_content_type_header(const string& content_type_header) {
+        //TODO: написать тесты на эту функцию
+        content_type obj;
+
+        size_t index = content_type_header.find(';');
+
+        string type = (index != string::npos) ? content_type_header.substr(0, index) : content_type_header;
+
+        obj.type = type;
+
+        //parse parameters
+        if (index != string::npos) {
+            string key;
+            string value;
+            string parameter;
+
+            char key_value_delimiter = '=';
+
+            size_t begin_of_parameter = index + 1;
+            size_t end_of_parameter;
+
+            while(content_type_header[begin_of_parameter] == ' ') {
+                begin_of_parameter++;
+            }
+
+            while ((index = content_type_header.find(';', index + 1)) != string::npos) {
+                end_of_parameter = index;
+                parameter = content_type_header.substr(begin_of_parameter, end_of_parameter - begin_of_parameter);
+
+                key = parameter.substr(0, parameter.find(key_value_delimiter));
+                value = parameter.substr(parameter.find(key_value_delimiter) + 1);
+
+                //remove quotes
+                if (value[0] == '"') {
+                    value = value.substr(1, value.length() - 2);
+                }
+
+                obj.parameters.emplace(key, value);
+
+                begin_of_parameter = end_of_parameter + 1;
+                while(content_type_header[begin_of_parameter] == ' ') {
+                    begin_of_parameter++;
+                }
+            }
+
+            parameter = content_type_header.substr(begin_of_parameter);
+            key = parameter.substr(0, parameter.find(key_value_delimiter));
+            value = parameter.substr(parameter.find(key_value_delimiter) + 1);
+
+            if (value[0] == '"') {
+                value = value.substr(1, value.length() - 2);
+            }
+
+            obj.parameters.emplace(key, value);
+        }
+
+        return obj;
     }
 
     http_request_parser::content_disposition http_request_parser::parse_content_disposition_header(const string& raw_content_disposition_header) {
@@ -256,144 +399,5 @@ namespace webserver {
         }
 
         return obj;
-    }
-
-    bool http_request_parser::check_if_current_request_body_line_is_end_boundary(const string &line, const string &boundary) {
-        return line.find("--" + boundary + "--") == 0;
-    }
-
-    bool http_request_parser::check_if_current_request_body_line_is_boundary(const string &line, const string& boundary) {
-        return line.find("--" + boundary) == 0;
-    }
-
-    void http_request_parser::parse_formdata_body(http_request &post_request, const vector<string> &raw_request_body, const string& boundary) {
-        string key;
-        string value;
-
-        for (auto current_line = raw_request_body.begin(); current_line != raw_request_body.end(); current_line++) {
-            if (check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
-                current_line++;
-                content_disposition current_body_subpart_content_disposition = parse_content_disposition_header(*current_line);
-
-                key = current_body_subpart_content_disposition.parameters["name"];
-
-                current_line++;
-
-                while(*current_line == "\r\n") {
-                    current_line++;
-                }
-
-                while (!check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
-                    value += *current_line;
-
-                    if (current_line + 1 != raw_request_body.end() && !check_if_current_request_body_line_is_boundary(*(current_line + 1), boundary)) {
-                        current_line++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                post_request.add_request_body_field(key, value);
-
-                key.clear();
-                value.clear();
-            }
-
-            if (check_if_current_request_body_line_is_end_boundary(*current_line, boundary)) {
-                break;
-            }
-        }
-    }
-
-    void http_request_parser::parse_post_request(http_request& post_request, const vector<string> &raw_request) {
-        const vector<string>& raw_request_body = get_raw_request_body(raw_request);
-
-        content_type obj = parse_content_type_header(post_request.get_header("Content-Type").value);
-
-        if (obj.type == "application/x-www-form-urlencoded") {
-            parse_urlencoded_body(post_request, raw_request_body);
-        }
-        else {
-            parse_formdata_body(post_request, raw_request_body, obj.parameters["boundary"]);
-        }
-    }
-
-    http_request http_request_parser::parse_request(const vector<string> &raw_request) {
-        http_request request;
-
-        parse_request_line(request, raw_request);
-        parse_url_to_parameters(request);
-        parse_headers(request, raw_request);
-
-        const string& url = request.get_request_url();
-        if (check_if_request_url_is_absolute_path(url)) {
-            extend_request_url_by_host(request);
-        }
-
-        if (request.get_request_method() == "POST") {
-            parse_post_request(request, raw_request);
-        }
-
-        return request;
-    }
-
-    http_request_parser::content_type http_request_parser::parse_content_type_header(const string& content_type_header) {
-        //TODO: написать тесты на эту функцию
-        content_type contentType;
-
-        size_t index = content_type_header.find(';');
-
-        string type = (index != string::npos) ? content_type_header.substr(0, index) : content_type_header;
-
-        contentType.type = type;
-
-        //parse parameters
-        if (index != string::npos) {
-            string key;
-            string value;
-            string parameter;
-
-            char key_value_delimiter = '=';
-
-            size_t begin_of_parameter = index + 1;
-            size_t end_of_parameter;
-
-            while(content_type_header[begin_of_parameter] == ' ') {
-                begin_of_parameter++;
-            }
-
-            while ((index = content_type_header.find(';', index + 1)) != string::npos) {
-                end_of_parameter = index;
-                parameter = content_type_header.substr(begin_of_parameter, end_of_parameter - begin_of_parameter);
-
-                key = parameter.substr(0, parameter.find(key_value_delimiter));
-                value = parameter.substr(parameter.find(key_value_delimiter) + 1);
-
-                //remove quotes
-                if (value[0] == '"') {
-                    value = value.substr(1, value.length() - 2);
-                }
-
-                contentType.parameters.emplace(key, value);
-
-                begin_of_parameter = end_of_parameter + 1;
-                while(content_type_header[begin_of_parameter] == ' ') {
-                    begin_of_parameter++;
-                }
-            }
-
-            parameter = content_type_header.substr(begin_of_parameter);
-            key = parameter.substr(0, parameter.find(key_value_delimiter));
-            value = parameter.substr(parameter.find(key_value_delimiter) + 1);
-
-            if (value[0] == '"') {
-                value = value.substr(1, value.length() - 2);
-            }
-
-            contentType.parameters.emplace(key, value);
-        }
-
-        return contentType;
     }
 }
