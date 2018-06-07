@@ -285,7 +285,6 @@ namespace webserver {
     }
 
     http_request_parser::content_type http_request_parser::parse_content_type_header(const string& content_type_header) {
-        //TODO: написать тесты на эту функцию
         content_type obj;
 
         size_t index = content_type_header.find(';');

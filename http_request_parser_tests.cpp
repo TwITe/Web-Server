@@ -29,7 +29,6 @@ TEST_CASE("ParseHeaders_RawRequest_ParsedHeaders", "Parser") {
     const vector<webserver::http_header>& received_request_headers = received_request.get_headers();
 
     for (unsigned long current_header_number = 0; current_header_number < proper_request_headers.size(); current_header_number++) {
-//        REQUIRE(proper_request_headers[current_header_number] == received_request_headers[current_header_number]);
         REQUIRE(received_request_headers[current_header_number].type == proper_request_headers[current_header_number].type);
         REQUIRE(received_request_headers[current_header_number].value == proper_request_headers[current_header_number].value);
     }
