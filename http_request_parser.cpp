@@ -150,7 +150,7 @@ namespace webserver {
         }
 
         body = raw_request[index_start_of_body];
-        //add "\r\n" for correct spliting the body
+        //add "\r\n" to the end for correct spliting the body
         body += "\r\n";
 
         string token;
