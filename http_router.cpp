@@ -12,17 +12,21 @@ namespace webserver {
         string shrinked_url;
 
         if (request_params_begin_position != string::npos) {
-            shrinked_url = url.substr(http_prefix_end_position, request_params_begin_position);
+            shrinked_url = url.substr(http_prefix_end_position, request_params_begin_position - http_prefix_end_position);
         }
         else {
             shrinked_url = url.substr(http_prefix_end_position);
         }
 
-        size_t host_end_position = shrinked_url.find('/');
+        size_t host_end_position = (shrinked_url.find('/') != string::npos ? shrinked_url.find('/') : shrinked_url.size());
 
         shrinked_url = shrinked_url.substr(host_end_position);
 
         pattern = shrinked_url;
+
+        if (pattern.empty()) {
+            pattern = "/";
+        }
 
         return pattern;
     }
