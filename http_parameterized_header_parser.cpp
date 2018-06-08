@@ -13,7 +13,7 @@ namespace webserver {
         parsed_parameterized_header.second.emplace(key, value);
     }
 
-    pair <string, map<string, string>> http_request_parameterized_header_parser::parse_parameterized_header(const string& raw_parameterized_header) {
+    pair<string, map<string, string>> http_request_parameterized_header_parser::parse_parameterized_header(const string& raw_parameterized_header) {
         pair<string, map<string, string>> parsed_parameterized_header;
 
         size_t index = raw_parameterized_header.find(';');

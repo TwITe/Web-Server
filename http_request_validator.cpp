@@ -96,7 +96,6 @@ namespace webserver {
     }
 
     bool http_request_validator::check_request(const http_request& request) {
-        //TODO: сделать проверку request line на лишние символы, как сделать если передавать нельзя raw строку
         if (!check_request_line(request)) {
             return false;
         }
