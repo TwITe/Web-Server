@@ -57,7 +57,28 @@ TEST_CASE("ParseRequestLine_RawRequest_ParsedRequestLine") {
 TEST_CASE("ParseUrlencodedRequestBody_RawUrlencodedBody_ParsedUrlencodedBody", "Parser") {
     vector<string> raw_request;
 
-    string request_body = "say=Hi&to=Mom";
+    string request_body = "say=Hi!";
+    raw_request.emplace_back("POST / HTTP/1.1\r\n");
+    raw_request.emplace_back("Host: foo.com\r\n");
+    raw_request.emplace_back("Content-Type: application/x-www-form-urlencoded; charset=\"utf-8\"\r\n");
+    raw_request.emplace_back("Content-Length: 13\r\n");
+    raw_request.emplace_back("\r\n");
+    raw_request.emplace_back(request_body);
+
+    webserver::http_request proper_request;
+
+    proper_request.add_request_body_field("say", "Hi!");
+
+    webserver::http_request_parser parser;
+    webserver::http_request received_request = parser.parse_request(raw_request);
+
+    REQUIRE(proper_request.get_request_body() == received_request.get_request_body());
+}
+
+TEST_CASE("ParseUrlencodedRequestBodyW/MultipleParameters_RawUrlencodedBody_ParsedUrlencodedBody", "Parser") {
+    vector<string> raw_request;
+
+    string request_body = "say=Hi&to=Mom&from=Son";
     raw_request.emplace_back("POST / HTTP/1.1\r\n");
     raw_request.emplace_back("Host: foo.com\r\n");
     raw_request.emplace_back("Content-Type: application/x-www-form-urlencoded; charset=\"utf-8\"\r\n");
@@ -69,6 +90,7 @@ TEST_CASE("ParseUrlencodedRequestBody_RawUrlencodedBody_ParsedUrlencodedBody", "
 
     proper_request.add_request_body_field("say", "Hi");
     proper_request.add_request_body_field("to", "Mom");
+    proper_request.add_request_body_field("from", "Son");
 
     webserver::http_request_parser parser;
     webserver::http_request received_request = parser.parse_request(raw_request);
