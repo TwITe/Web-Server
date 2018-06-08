@@ -4,6 +4,139 @@
 using namespace std;
 
 namespace webserver {
+    //split request body into vector of strings for ease of parsing of request body
+    vector<string> http_request_parser::get_splitted_raw_request_body(const vector<string>& raw_request) {
+        vector<string> raw_request_body;
+        string body;
+
+        unsigned long index_start_of_body;
+        for (unsigned long current_request_line_number = 0; current_request_line_number < raw_request.size(); current_request_line_number++) {
+            if (raw_request[current_request_line_number] == "\r\n") {
+                index_start_of_body = current_request_line_number + 1;
+                break;
+            }
+        }
+
+        body = raw_request[index_start_of_body];
+        //add "\r\n" to the end for correct spliting the body
+        body += "\r\n";
+
+        string token;
+        istringstream iss(body);
+
+        regex rx("[^\r\n]+\r\n");
+        sregex_iterator formated_body_list(body.begin(), body.end(), rx), rxend;
+
+        while(formated_body_list != rxend) {
+            const string& current_line = formated_body_list->str();
+            raw_request_body.emplace_back(current_line.substr(0, current_line.length() - 2));
+            ++formated_body_list;
+        }
+
+        return raw_request_body;
+    }
+
+    http_request_parser::content_type http_request_parser::parse_content_type_header(const string& raw_content_type_header) {
+        pair <string, map<string, string>> parsed_parameterized_header = parameterized_header_parser.parse_parameterized_header(raw_content_type_header);
+
+        content_type converted_header{parsed_parameterized_header.first, parsed_parameterized_header.second};
+
+        return converted_header;
+    }
+
+    http_request_parser::content_disposition http_request_parser::parse_content_disposition_header(const string& raw_content_disposition_header) {
+        pair <string, map<string, string>> parsed_parameterized_header = parameterized_header_parser.parse_parameterized_header(raw_content_disposition_header);
+
+        content_disposition converted_header{parsed_parameterized_header.first, parsed_parameterized_header.second};
+
+        return converted_header;
+    }
+
+    void http_request_parser::parse_urlencoded_body(http_request &post_request, const vector<string> &raw_request_body) {
+        char tuples_delimiter = '&';
+        char key_value_delimiter = '=';
+
+        string key;
+        string value;
+
+        bool key_appeared = true;
+
+        for (const auto& current_line : raw_request_body) {
+            for (const auto& current_char : current_line) {
+                if (current_char == tuples_delimiter) {
+                    key_appeared = true;
+
+                    post_request.add_request_body_field(key, value);
+
+                    key.clear();
+                    value.clear();
+
+                    continue;
+                }
+
+                if (current_char == key_value_delimiter) {
+                    key_appeared = false;
+                    continue;
+                }
+
+                key_appeared ? key.push_back(current_char) :  value.push_back(current_char);
+            }
+        }
+
+        post_request.add_request_body_field(key, value);
+    }
+
+
+
+    bool http_request_parser::check_if_current_request_body_line_is_end_boundary(const string &line, const string &boundary) {
+        return line.find("--" + boundary + "--") == 0;
+    }
+
+    bool http_request_parser::check_if_current_request_body_line_is_boundary(const string &line, const string& boundary) {
+        return line.find("--" + boundary) == 0;
+    }
+
+    void http_request_parser::parse_formdata_body(http_request &post_request, const vector<string> &raw_request_body, const string& boundary) {
+        string key;
+        string value;
+
+        for (auto current_line = raw_request_body.begin(); current_line != raw_request_body.end(); current_line++) {
+            if (check_if_current_request_body_line_is_end_boundary(*current_line, boundary)) {
+                break;
+            }
+
+            if (check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
+                current_line++;
+                content_disposition current_body_subpart_content_disposition = parse_content_disposition_header(*current_line);
+
+                key = current_body_subpart_content_disposition.parameters["name"];
+
+                current_line++;
+
+                while(*current_line == "\r\n") {
+                    current_line++;
+                }
+
+                //add string to value until next boundary or body end
+                while (true) {
+                    value += *current_line;
+
+                    if (current_line + 1 != raw_request_body.end() && !check_if_current_request_body_line_is_boundary(*(current_line + 1), boundary)) {
+                        current_line++;
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                post_request.add_request_body_field(key, value);
+
+                key.clear();
+                value.clear();
+            }
+        }
+    }
+
     void http_request_parser::parse_request_line(http_request& request, const vector<string>& raw_request) {
         istringstream request_line(raw_request[0]);
 
@@ -137,123 +270,8 @@ namespace webserver {
         return request_url[0] == '/';
     }
 
-    vector<string> http_request_parser::get_raw_request_body(const vector<string> &raw_request) {
-        vector<string> raw_request_body;
-        string body;
-
-        unsigned long index_start_of_body;
-        for (unsigned long current_request_line_number = 0; current_request_line_number < raw_request.size(); current_request_line_number++) {
-            if (raw_request[current_request_line_number] == "\r\n") {
-                index_start_of_body = current_request_line_number + 1;
-                break;
-            }
-        }
-
-        body = raw_request[index_start_of_body];
-        //add "\r\n" to the end for correct spliting the body
-        body += "\r\n";
-
-        string token;
-        istringstream iss(body);
-
-        regex rx("[^\r\n]+\r\n");
-        sregex_iterator formated_body_list(body.begin(), body.end(), rx), rxend;
-
-        while(formated_body_list != rxend) {
-            const string& current_line = formated_body_list->str();
-            raw_request_body.emplace_back(current_line.substr(0, current_line.length() - 2));
-            ++formated_body_list;
-        }
-
-        return raw_request_body;
-    }
-
-    void http_request_parser::parse_urlencoded_body(http_request &post_request, const vector<string> &raw_request_body) {
-        char tuples_delimiter = '&';
-        char key_value_delimiter = '=';
-
-        string key;
-        string value;
-
-        bool key_appeared = true;
-
-        for (const auto& current_line : raw_request_body) {
-            for (const auto& current_char : current_line) {
-                if (current_char == tuples_delimiter) {
-                    key_appeared = true;
-
-                    post_request.add_request_body_field(key, value);
-
-                    key.clear();
-                    value.clear();
-
-                    continue;
-                }
-
-                if (current_char == key_value_delimiter) {
-                    key_appeared = false;
-                    continue;
-                }
-
-                key_appeared ? key.push_back(current_char) :  value.push_back(current_char);
-            }
-        }
-
-        post_request.add_request_body_field(key, value);
-    }
-
-
-
-    bool http_request_parser::check_if_current_request_body_line_is_end_boundary(const string &line, const string &boundary) {
-        return line.find("--" + boundary + "--") == 0;
-    }
-
-    bool http_request_parser::check_if_current_request_body_line_is_boundary(const string &line, const string& boundary) {
-        return line.find("--" + boundary) == 0;
-    }
-
-    void http_request_parser::parse_formdata_body(http_request &post_request, const vector<string> &raw_request_body, const string& boundary) {
-        string key;
-        string value;
-
-        for (auto current_line = raw_request_body.begin(); current_line != raw_request_body.end(); current_line++) {
-            if (check_if_current_request_body_line_is_end_boundary(*current_line, boundary)) {
-                break;
-            }
-
-            if (check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
-                current_line++;
-                content_disposition current_body_subpart_content_disposition = parse_content_disposition_header(*current_line);
-
-                key = current_body_subpart_content_disposition.parameters["name"];
-
-                current_line++;
-
-                while(*current_line == "\r\n") {
-                    current_line++;
-                }
-
-                while (!check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
-                    value += *current_line;
-
-                    if (current_line + 1 != raw_request_body.end() && !check_if_current_request_body_line_is_boundary(*(current_line + 1), boundary)) {
-                        current_line++;
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                post_request.add_request_body_field(key, value);
-
-                key.clear();
-                value.clear();
-            }
-        }
-    }
-
     void http_request_parser::parse_post_request(http_request& post_request, const vector<string> &raw_request) {
-        const vector<string>& raw_request_body = get_raw_request_body(raw_request);
+        const vector<string>& raw_request_body = get_splitted_raw_request_body(raw_request);
 
         content_type obj = parse_content_type_header(post_request.get_header("Content-Type").value);
 
@@ -282,121 +300,5 @@ namespace webserver {
         }
 
         return request;
-    }
-
-    http_request_parser::content_type http_request_parser::parse_content_type_header(const string& content_type_header) {
-        content_type obj;
-
-        size_t index = content_type_header.find(';');
-
-        string type = (index != string::npos) ? content_type_header.substr(0, index) : content_type_header;
-
-        obj.type = type;
-
-        //parse parameters
-        if (index != string::npos) {
-            string key;
-            string value;
-            string parameter;
-
-            char key_value_delimiter = '=';
-
-            size_t begin_of_parameter = index + 1;
-            size_t end_of_parameter;
-
-            while(content_type_header[begin_of_parameter] == ' ') {
-                begin_of_parameter++;
-            }
-
-            while ((index = content_type_header.find(';', index + 1)) != string::npos) {
-                end_of_parameter = index;
-                parameter = content_type_header.substr(begin_of_parameter, end_of_parameter - begin_of_parameter);
-
-                key = parameter.substr(0, parameter.find(key_value_delimiter));
-                value = parameter.substr(parameter.find(key_value_delimiter) + 1);
-
-                //remove quotes
-                if (value[0] == '"') {
-                    value = value.substr(1, value.length() - 2);
-                }
-
-                obj.parameters.emplace(key, value);
-
-                begin_of_parameter = end_of_parameter + 1;
-                while(content_type_header[begin_of_parameter] == ' ') {
-                    begin_of_parameter++;
-                }
-            }
-
-            parameter = content_type_header.substr(begin_of_parameter);
-            key = parameter.substr(0, parameter.find(key_value_delimiter));
-            value = parameter.substr(parameter.find(key_value_delimiter) + 1);
-
-            if (value[0] == '"') {
-                value = value.substr(1, value.length() - 2);
-            }
-
-            obj.parameters.emplace(key, value);
-        }
-
-        return obj;
-    }
-
-    http_request_parser::content_disposition http_request_parser::parse_content_disposition_header(const string& raw_content_disposition_header) {
-        content_disposition obj;
-
-        size_t index = raw_content_disposition_header.find(';');
-
-        string type = (index != string::npos) ? raw_content_disposition_header.substr(0, index) : raw_content_disposition_header;
-
-        obj.type = type;
-
-        //parse parameters
-        if (index != string::npos) {
-            string key;
-            string value;
-            string parameter;
-
-            char key_value_delimiter = '=';
-
-            size_t begin_of_parameter = index + 1;
-            size_t end_of_parameter;
-
-            while (raw_content_disposition_header[begin_of_parameter] == ' ') {
-                begin_of_parameter++;
-            }
-
-            while ((index = raw_content_disposition_header.find(';', index + 1)) != string::npos) {
-                end_of_parameter = index;
-                parameter = raw_content_disposition_header.substr(begin_of_parameter, end_of_parameter - begin_of_parameter);
-
-                key = parameter.substr(0, parameter.find(key_value_delimiter));
-                value = parameter.substr(parameter.find(key_value_delimiter) + 1);
-
-                //remove quotes
-                if (value[0] == '"') {
-                    value = value.substr(1, value.length() - 2);
-                }
-
-                obj.parameters.emplace(key, value);
-
-                begin_of_parameter = end_of_parameter + 1;
-                while (raw_content_disposition_header[begin_of_parameter] == ' ') {
-                    begin_of_parameter++;
-                }
-            }
-
-            parameter = raw_content_disposition_header.substr(begin_of_parameter);
-            key = parameter.substr(0, parameter.find(key_value_delimiter));
-            value = parameter.substr(parameter.find(key_value_delimiter) + 1);
-
-            if (value[0] == '"') {
-                value = value.substr(1, value.length() - 2);
-            }
-
-            obj.parameters.emplace(key, value);
-        }
-
-        return obj;
     }
 }

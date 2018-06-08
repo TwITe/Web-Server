@@ -1,6 +1,7 @@
 #ifndef WEB_HTTP_REQUEST_PARSER_H
 #define WEB_HTTP_REQUEST_PARSER_H
 #include "http_request.h"
+#include "http_request_parameterized_header_parser.h"
 #include <string>
 #include <sstream>
 
@@ -23,19 +24,23 @@ namespace webserver {
 
         bool check_if_request_url_is_absolute_path(const string& url);
 
-        vector<string> get_raw_request_body(const vector<string>& raw_request);
+        vector<string> get_splitted_raw_request_body(const vector<string>& raw_request);
+
+        http_request_parameterized_header_parser parameterized_header_parser;
 
         struct content_type {
             string type;
-            map <string, string> parameters;
+            map<string, string> parameters;
         };
 
         struct content_disposition {
             string type;
-            map <string, string> parameters;
+            map<string, string> parameters;
         };
 
         content_disposition parse_content_disposition_header(const string& raw_content_disposition_header);
+
+        content_type parse_content_type_header(const string& raw_content_type_header);
 
         void parse_urlencoded_body(http_request& post_request, const vector<string>& raw_request_body);
 
@@ -46,8 +51,6 @@ namespace webserver {
         void parse_formdata_body(http_request& post_request, const vector<string>& raw_request_body, const string& boundary);
 
         void parse_post_request(http_request& post_request, const vector<string>& raw_request);
-
-        content_type parse_content_type_header(const string& content_type_header);
     public:
         http_request parse_request(const vector<string> &raw_request);
     };
