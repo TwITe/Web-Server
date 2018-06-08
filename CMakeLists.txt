@@ -22,9 +22,9 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
 #        web_server_run.cpp
 #        ------------------
 
-         http_request_parser_tests.cpp
+        http_request_parser_tests.cpp
         http_parameterized_header_parser_tests.cpp
-#        http_router_tests.cpp
+        http_router_tests.cpp
 
 #        serverclient tests
 #        ------------------
