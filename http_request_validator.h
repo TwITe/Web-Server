@@ -5,7 +5,8 @@
 #include <set>
 
 namespace webserver {
-    //TODO: написать тесты на валидатор
+    // Пока валидатор отключен
+    //TODO: валидатор нужно полностью переделать так, чтобы он возвращал разные коды ошибок, а не true/false (иначе не возможно покрыть все случаи)
     class http_request_validator {
     private:
         bool check_request_line_method(const string &request_method);

@@ -35,7 +35,7 @@ namespace webserver {
 
         http_request_parser parser;
 
-        http_request_validator request_syntax_validator;
+//        http_request_validator request_syntax_validator;
 
         http_response_builder response_builder;
 
@@ -71,15 +71,16 @@ namespace webserver {
 
             http_response response;
 
-            if (!request_syntax_validator.check_request(request)) {
-                response = generate_400_error_response(request);
-            }
-            else {
+//            if (!request_syntax_validator.check_request(request)) { // должна быть другая работа валидатора: он будет возвращать код ошибки, и в веб сервере
+            //генерироваться требуемый response по коду ошибки
+//                response = generate_400_error_response(request);
+//            }
+//            else {
                 web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
                 const function<http_response(http_request)>& handler = suitable_web_handler.get_transform_to_response_function();
 
                 response = handler(request);
-            }
+//            }
 
             string server_response = response_builder.build_response(response);
             return server_response;
