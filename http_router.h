@@ -5,7 +5,7 @@
 #include "http_request.h"
 
 namespace webserver {
-    //searches proper web handler for the particular request
+    //searches the proper web handler for the particular request
     class http_router {
     private:
         string get_request_pattern(const http_request& request);
