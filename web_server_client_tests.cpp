@@ -56,9 +56,9 @@ TEST_CASE("Get 404 response for request with non-existing web handler","Client")
     string received_message = string(buffer);
 
     string proper_response = "HTTP/1.1 404 Not Found\r\n"
-                             "Content-Length: 26\r\n"
+                             "Content-Length: 9\r\n"
                              "\r\n"
-                             "Oops! Something went wrong\r\n";
+                             "Not Found";
 
     cout << "[Client] Server message: " << buffer << endl;
     cout << "============================" << endl << endl;
@@ -66,10 +66,10 @@ TEST_CASE("Get 404 response for request with non-existing web handler","Client")
     REQUIRE(received_message == proper_response);
 }
 
-TEST_CASE("Get 400 response for bad request","") {
-    //TODO: дописать тесты
-    unsigned short int PORT = 8080;
-    int sockfd;
-    struct sockaddr_in server_address;
-    open_connection(PORT, sockfd, server_address);
-}
+//TEST_CASE("Get 400 response for bad request","") {
+//    //TODO: дописать тесты
+//    unsigned short int PORT = 8080;
+//    int sockfd;
+//    struct sockaddr_in server_address;
+//    open_connection(PORT, sockfd, server_address);
+//}
