@@ -273,7 +273,15 @@ namespace webserver {
     void http_request_parser::parse_post_request(http_request& post_request, const vector<string> &raw_request) {
         const vector<string>& raw_request_body = get_splitted_raw_request_body(raw_request);
 
-        content_type obj = parse_content_type_header(post_request.get_header("Content-Type").value);
+        const http_header& content_type_header = post_request.get_header("Content-Type");
+
+        if (content_type_header.type == "Error") {
+            throw runtime_error("No Content-Type header given to parse request body");
+        }
+
+        string content_type_value = content_type_header.value;
+
+        content_type obj = parse_content_type_header(content_type_value);
 
         if (obj.type == "application/x-www-form-urlencoded") {
             parse_urlencoded_body(post_request, raw_request_body);
