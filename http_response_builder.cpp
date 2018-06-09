@@ -51,7 +51,7 @@ namespace webserver {
     string http_response_builder::build_response_status_line(const webserver::http_response& response) {
         string response_http_version = "HTTP/1.1";
         int response_status_code = response.get_response_code();
-        string response_reason_phrase = reason_phrases[response_status_code];
+        const string& response_reason_phrase = reason_phrases[response_status_code];
 
         string response_status_line = response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase + "\r\n";
 
@@ -64,7 +64,7 @@ namespace webserver {
 
     void http_response_builder::add_response_header_fields(const http_response &response,
                                                            string &converted_to_string_response) {
-        vector<http_header> response_headers = response.get_response_headers();
+        const vector<http_header>& response_headers = response.get_response_headers();
 
         for (const http_header& current_header : response_headers) {
             converted_to_string_response += current_header.type + ": " + current_header.value + "\r\n";
@@ -82,9 +82,9 @@ namespace webserver {
     }
 
     void http_response_builder::add_response_body(const http_response& response, string& converted_to_string_response) {
-        const string& response_message_body = response.get_response_body();
+        const string& response_body = response.get_response_body();
 
-        converted_to_string_response += response_message_body;
+        converted_to_string_response += response_body;
     }
 
     string http_response_builder::build_response(const http_response& response) {
@@ -94,7 +94,9 @@ namespace webserver {
         add_response_header_fields(response, converted_to_string_response);
 
         unsigned long response_body_length = response.get_content_length();
+
         bool is_response_message_body_exists = (response_body_length != 0);
+
         if (is_response_message_body_exists) {
             add_content_length_header(response, converted_to_string_response);
             converted_to_string_response += "\r\n";
