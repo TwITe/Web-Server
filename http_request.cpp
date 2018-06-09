@@ -50,13 +50,15 @@ namespace webserver {
         request_body.emplace(name, value);
     }
 
-    const http_header& http_request::get_header(const string& header_name) {
+
+
+    const http_header http_request::get_header(const string& header_name) {
         for (const auto& current_header : headers) {
             if (current_header.type == header_name) {
                 return current_header;
             }
         }
-        http_header* error_header = new http_header{"af", "ad"};
-        return *error_header;
+        http_header error_header{"Error", ""};
+        return error_header;
     }
 }

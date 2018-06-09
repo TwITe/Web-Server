@@ -47,7 +47,7 @@ namespace webserver {
 
         const vector<http_header>& get_headers() const;
 
-        const http_header& get_header(const string& header_name);
+        const http_header get_header(const string& header_name);
 
         const vector<request_param> get_request_params() const;
 
