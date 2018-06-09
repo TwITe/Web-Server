@@ -1,7 +1,7 @@
 #include "tcp_server.h"
 
 namespace webserver {
-    tcp_server::tcp_server(unsigned short int PORT, const function<string(char*)>& convert_client_message) : PORT(PORT), convert_client_message(convert_client_message) {}
+    tcp_server::tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message) : PORT(PORT), convert_client_message(convert_client_message) {}
 
     void tcp_server::start() {
         memset(&server_address, 0, sizeof(server_address));
@@ -33,27 +33,35 @@ namespace webserver {
     }
 
     void tcp_server::connection_handler(int socket) {
-        char read_buffer[128000];
+        char read_buffer[1024];
         memset(&read_buffer, 0, sizeof(read_buffer));
 
         //TODO: Сделать чтение буферами по 1024 байта
-        while ((static_cast<size_t>(recv(socket, read_buffer, 512000, 0))) > 0) {
-            cout << "[Server] Client message accepted" << endl;
-            cout << "[Server] Client message: " << endl << read_buffer << endl;
-
-            string converted_message_for_send = convert_client_message(read_buffer);
-
-            if (send(socket, converted_message_for_send.c_str(), converted_message_for_send.size(), 0) == -1) {
-                cout << "[Server] Message sending failed" << endl;
+        int size;
+        string received_message;
+        for (;;) {
+            while ((size = recv(socket, read_buffer, sizeof(read_buffer), 0)) > 0) {
+                for (unsigned int i = 0; i < size; i++)
+                    received_message.push_back(read_buffer[i]);
             }
-
-            cout << converted_message_for_send << endl;
-
-            cout << "[Server] Message sent to client" << endl << endl;
-            cout << "============================" << endl << endl;
-
-            memset(&read_buffer, 0, 128000);
+            else {
+                break;
+            }
         }
+
+        cout << "[Server] Client's message accepted" << endl;
+        cout << "[Server] Client's message: " << endl << read_buffer << endl;
+
+        string response_message = convert_client_message(received_message);
+
+        if (send(socket, response_message.c_str(), response_message.size(), 0) == -1) {
+            cout << "[Server] Message sending failed" << endl;
+        }
+
+        cout << "[Server] Server's response: " << endl << response_message << endl;
+
+        cout << "[Server] Message sent to client" << endl << endl;
+        cout << "============================" << endl << endl;
     }
 
     void tcp_server::take_requests() {

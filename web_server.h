@@ -41,9 +41,7 @@ namespace webserver {
 
         http_response generate_400_error_response(const http_request& request);
 
-        function<string(char*)> convert_client_message = [&](char* request_char_buffer) -> string {
-            string raw_client_message(request_char_buffer);
-
+        function<string(string)> convert_client_message = [&](string raw_client_message) -> string {
             vector<string> message_fields;
             string buffer;
 

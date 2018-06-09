@@ -25,9 +25,9 @@ namespace webserver {
 
         socklen_t socket_length;
 
-        const function<string(char*)>& convert_client_message;
+        const function<string(string)>& convert_client_message;
     public:
-        tcp_server(unsigned short int PORT, const function<string(char*)>& convert_client_message);
+        tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message);
 
         void start();
 
