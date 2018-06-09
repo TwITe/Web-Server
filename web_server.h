@@ -73,7 +73,8 @@ namespace webserver {
 
             if (!request_syntax_validator.check_request(request)) {
                 response = generate_400_error_response(request);
-            } else {
+            }
+            else {
                 web_handler suitable_web_handler = request_handler_router.get_suitable_request_handler(handlers, request);
                 const function<http_response(http_request)>& handler = suitable_web_handler.get_transform_to_response_function();
 
