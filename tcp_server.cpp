@@ -11,7 +11,7 @@ namespace webserver {
 
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(PORT);
-        //TODO: сделать, чтобы работало со всеми ip, которые задает программист
+        //TODO: Cделать, чтобы работало со всеми ip, которые задает программист
         if (inet_aton("127.0.0.1", &server_address.sin_addr) == 0) {
             throw runtime_error("[Server] Invalid IP address");
         }
@@ -36,7 +36,7 @@ namespace webserver {
         char read_buffer[128000];
         memset(&read_buffer, 0, sizeof(read_buffer));
 
-        //TODO:Сделать чтение буферами по 1024 байта
+        //TODO: Сделать чтение буферами по 1024 байта
         while ((static_cast<size_t>(recv(socket, read_buffer, 512000, 0))) > 0) {
             cout << "[Server] Client message accepted" << endl;
             cout << "[Server] Client message: " << endl << read_buffer << endl;

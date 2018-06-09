@@ -9,7 +9,7 @@ int main() {
     function<webserver::http_response(webserver::http_request)> index_handler = [&](webserver::http_request request) {
         webserver::http_response response;
 
-        string response_body = "hello world!";
+        string response_body = "Hello, World!";
 
         response.set_response_body(response_body);
         response.set_response_http_code(200);
