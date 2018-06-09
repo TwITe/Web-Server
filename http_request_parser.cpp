@@ -52,6 +52,14 @@ namespace webserver {
         return converted_header;
     }
 
+    void http_request_parser::parse_plaintext_body(http_request& post_request, const vector<string>& raw_request_body) {
+        int line_count = 0;
+        for (const auto& current_line : raw_request_body) {
+            post_request.add_request_body_field("line " + to_string(line_count), current_line);
+            line_count++;
+        }
+    }
+
     void http_request_parser::parse_urlencoded_body(http_request &post_request, const vector<string> &raw_request_body) {
         char tuples_delimiter = '&';
         char key_value_delimiter = '=';
@@ -285,6 +293,9 @@ namespace webserver {
 
         if (obj.type == "application/x-www-form-urlencoded") {
             parse_urlencoded_body(post_request, raw_request_body);
+        }
+        if (obj.type == "text/plain" ) {
+            parse_plaintext_body(post_request, raw_request_body);
         }
         else {
             parse_formdata_body(post_request, raw_request_body, obj.parameters["boundary"]);
