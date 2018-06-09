@@ -71,17 +71,19 @@ namespace webserver {
         }
     }
 
-    void http_response_builder::add_response_body(const http_response& response, string& converted_to_string_response) {
+    void http_response_builder::add_content_length_header(const http_response& response, string& converted_to_string_response) {
         unsigned long response_body_length = response.get_content_length();
 
         http_header content_length_header;
         content_length_header.type = "Content-Length";
         content_length_header.value = to_string(response_body_length);
 
+        converted_to_string_response += content_length_header.type + ": " + content_length_header.value + "\r\n";
+    }
+
+    void http_response_builder::add_response_body(const http_response& response, string& converted_to_string_response) {
         const string& response_message_body = response.get_response_body();
 
-        converted_to_string_response += content_length_header.type + ": " + content_length_header.value + "\r\n";
-        converted_to_string_response += "\r\n";
         converted_to_string_response += response_message_body;
     }
 
@@ -94,6 +96,8 @@ namespace webserver {
         unsigned long response_body_length = response.get_content_length();
         bool is_response_message_body_exists = (response_body_length != 0);
         if (is_response_message_body_exists) {
+            add_content_length_header(response, converted_to_string_response);
+            converted_to_string_response += "\r\n";
             add_response_body(response, converted_to_string_response);
         }
 
