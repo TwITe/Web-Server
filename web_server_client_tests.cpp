@@ -42,7 +42,7 @@ TEST_CASE("Get 404 response for request with non-existing web handler","client")
     if (write(sockfd, message.c_str(), message.size()) == -1) {
         cout << "[client] Message sending failed" << endl;
     }
-    cout << "[client] Message sent to server" << endl;
+    cout << "[client] Message was sent to server" << endl;
 
     char buffer[128000];
 
@@ -84,7 +84,7 @@ TEST_CASE("Get 200 response for request with existing web handler","client") {
     if (write(sockfd, message.c_str(), message.size()) == -1) {
         cout << "[client] Message sending failed" << endl;
     }
-    cout << "[client] Message sent to server" << endl;
+    cout << "[client] Message was sent to server" << endl;
 
     char buffer[128000];
 
