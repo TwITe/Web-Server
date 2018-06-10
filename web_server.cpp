@@ -1,7 +1,7 @@
 #include "web_server.h"
 
 namespace webserver {
-    web_server::web_server(unsigned short int port, const vector<web_handler>& handlers) : handlers(handlers), server(port, convert_client_message) {}
+    web_server::web_server(unsigned short int port, const vector<web_handler>& handlers) : handlers(handlers), server(port, convert_client_message, allowed_connections_number) {}
 
     http_response web_server::generate_400_error_response(const http_request& request) {
         _Pragma("GCC diagnostic push")
@@ -33,6 +33,6 @@ namespace webserver {
     }
 
     void web_server::stop() {
-        return;
+        server.stop();
     }
 }
