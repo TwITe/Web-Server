@@ -11,7 +11,9 @@
 #include <functional>
 #include <iostream>
 #include <thread>
+#include <mutex>
 #include <stdexcept>
+#include "client.h"
 using namespace std;
 
 namespace webserver {
@@ -19,23 +21,29 @@ namespace webserver {
     private:
         unsigned short int PORT;
 
+        const int allowed_connections_number;
+
         int listener_socket;
 
         struct sockaddr_in server_address{};
 
-        socklen_t socket_length;
-
         const function<string(string)>& convert_client_message;
+
+        vector<client> clients;
+
+        mutex mx;
     public:
-        tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message);
+        tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, int allowed_connections_number);
 
         void start();
 
         void stop();
     private:
-        void connection_handler(int client_socket);
+        void connection_handler(client* cl);
 
         void take_requests();
+
+        int find_client_index(client* cl);
     };
 }
 
