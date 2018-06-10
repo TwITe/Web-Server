@@ -7,25 +7,23 @@ void open_connection(unsigned short int PORT, int& sockfd, struct sockaddr_in& s
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-    memset(&server_address, '0', sizeof(server_address));
+    memset(&server_address, 0, sizeof(server_address));
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
-    if (inet_aton("127.0.0.1", &server_address.sin_addr) == 0) {
-        cout << "[Server] Invalid IP address" << endl;
-    }
+    server_address.sin_addr.s_addr = INADDR_ANY;
 
     if (connect(sockfd, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
-        cout << "[Client] Connection failed" << endl;
+        cout << "[client] Connection failed" << endl;
     }
-    cout << "[Client] All setting are done" << endl;
-    cout << "[Client] Succefully connected to server" << endl << endl;
+    cout << "[client] All setting are done" << endl;
+    cout << "[client] Succefully connected to the server" << endl << endl;
     cout << "----------------------------" << endl << endl;
 }
 
-TEST_CASE("Get 404 response for request with non-existing web handler","Client") {
+TEST_CASE("Get 404 response for request with non-existing web handler","client") {
     unsigned short int PORT = 8080;
     int sockfd;
-    struct sockaddr_in server_address;
+    struct sockaddr_in server_address{};
     open_connection(PORT, sockfd, server_address);
 
     string message = "GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1\r\n"
@@ -42,9 +40,9 @@ TEST_CASE("Get 404 response for request with non-existing web handler","Client")
                      "Cache-Control: no-cache\r\n"
                      "\r\n";
     if (write(sockfd, message.c_str(), message.size()) == -1) {
-        cout << "[Client] Message sending failed" << endl;
+        cout << "[client] Message sending failed" << endl;
     }
-    cout << "[Client] Message sent to server" << endl;
+    cout << "[client] Message sent to server" << endl;
 
     char buffer[128000];
 
@@ -58,16 +56,16 @@ TEST_CASE("Get 404 response for request with non-existing web handler","Client")
                              "\r\n"
                              "Not Found";
 
-    cout << "[Client] Server message: " << buffer << endl;
+    cout << "[client] Server message: " << buffer << endl;
     cout << "============================" << endl << endl;
 
     REQUIRE(received_message == proper_response);
 }
 
-TEST_CASE("Get 200 response for request with existing web handler","Client") {
+TEST_CASE("Get 200 response for request with existing web handler","client") {
     unsigned short int PORT = 8080;
     int sockfd;
-    struct sockaddr_in server_address;
+    struct sockaddr_in server_address{};
     open_connection(PORT, sockfd, server_address);
 
     string message = "GET /index HTTP/1.1\r\n"
@@ -84,9 +82,9 @@ TEST_CASE("Get 200 response for request with existing web handler","Client") {
                      "Cache-Control: no-cache\r\n"
                      "\r\n";
     if (write(sockfd, message.c_str(), message.size()) == -1) {
-        cout << "[Client] Message sending failed" << endl;
+        cout << "[client] Message sending failed" << endl;
     }
-    cout << "[Client] Message sent to server" << endl;
+    cout << "[client] Message sent to server" << endl;
 
     char buffer[128000];
 
@@ -101,7 +99,7 @@ TEST_CASE("Get 200 response for request with existing web handler","Client") {
                              "\r\n"
                              "Hello, World!";
 
-    cout << "[Client] Server message: " << buffer << endl;
+    cout << "[client] Server message: " << buffer << endl;
     cout << "============================" << endl << endl;
 
     REQUIRE(received_message == proper_response);
