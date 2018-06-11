@@ -46,8 +46,6 @@ namespace webserver {
     }
 
     void tcp_server::connection_handler(client* cl) {
-        char read_buffer[1024];
-
         // add client to the clients <vector>
         mx.lock();
 
@@ -57,6 +55,7 @@ namespace webserver {
 
         mx.unlock();
 
+        char read_buffer[1024];
         ssize_t message_size;
         string received_message;
         while (true) {

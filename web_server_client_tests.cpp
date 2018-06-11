@@ -274,7 +274,7 @@ TEST_CASE("Connect Multiple Clients", "Client") {
     }
     cout << "[Client] Message was sent to server" << endl;
 
-    //close 1st connection to free slot for 2nd client
+    //close 1st connection to get free slot for 2nd client
     close(sockfd_1);
 
     memset(&buffer, 0, 128000);
