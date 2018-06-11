@@ -40,6 +40,15 @@ namespace webserver {
             string error_message = "Not Found";
             response.set_response_body(error_message);
             response.set_response_http_code(404);
+
+            vector<http_header> response_headers;
+
+            http_header content_type{"Content-Type", "text/plain"};
+
+            response_headers.emplace_back(content_type);
+
+            response.set_response_headers(response_headers);
+
             response.set_response_length(error_message.size());
 
             return response;
