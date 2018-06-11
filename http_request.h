@@ -12,7 +12,7 @@ namespace webserver {
     //Класс, который инкапсулирует в себе http запрос: HTTP заголовки,
     //URL запроса, request-параметры, тело запроса (в случае POST запроса), тип запроса - GET, POST, PUT
     class http_request {
-    protected:
+    private:
         //заголовки HTTP запроса
         vector<http_header> headers;
 
@@ -30,7 +30,7 @@ namespace webserver {
         //Метод запроса - POST, GET, PUT, PATCH, HEADER...
         string method;
 
-        //Версия HTTP - указывается в request line
+        //Версия HTTP протокола - указывается в request line
         string http_version;
     public:
         void set_http_request_method(const string& client_requst_method);
