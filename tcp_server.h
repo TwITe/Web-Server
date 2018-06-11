@@ -14,6 +14,7 @@
 #include <mutex>
 #include <stdexcept>
 #include "client.h"
+#include <queue>
 using namespace std;
 
 namespace webserver {
@@ -21,9 +22,11 @@ namespace webserver {
     private:
         unsigned short int PORT;
 
-        const int allowed_connections_number;
+        const unsigned int allowed_connections_number;
 
         int listener_socket;
+
+        queue<client*> clients_queue;
 
         struct sockaddr_in server_address{};
 
@@ -42,6 +45,8 @@ namespace webserver {
         void connection_handler(client* cl);
 
         void take_requests();
+
+        void handle_awaiting_clients();
 
         int find_client_index(client* cl);
     };
