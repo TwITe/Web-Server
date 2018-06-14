@@ -1,7 +1,7 @@
 #include "tcp_server.h"
 
 namespace webserver {
-    tcp_server::tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, int allowed_connections_number) :
+    tcp_server::tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, unsigned int allowed_connections_number) :
             PORT(PORT), allowed_connections_number(allowed_connections_number), convert_client_message(convert_client_message) {}
 
     void tcp_server::start() {
@@ -156,7 +156,7 @@ namespace webserver {
                     handling_thread.detach();
                 }
                 else {
-                    cout << "[Server] No free slots, Your place in queue is " << clients_queue.size() + 1 << ". Please stand by..." << endl;
+                    cout << "[Server] No free slots. Your place in queue is " << clients_queue.size() + 1 << ". Please stand by..." << endl;
                     clients_queue.push(current_client);
                 }
             }

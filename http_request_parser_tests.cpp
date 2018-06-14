@@ -109,7 +109,10 @@ TEST_CASE("ParseFormDataRequestBody_RawFormDataBodyw/EndBoundary_ParsedFormDataB
                           "Content-Disposition: form-data; name=\"field2\"; filename=\"example.txt\"\r\n"
                           "\r\n"
                           "value2\r\n"
-                          "--boundary--";
+                          "--boundary--\r\n"
+                          "Content-Disposition: form-data; name=\"field3\"\r\n"
+                          "\r\n"
+                          "value3";
 
     raw_request.emplace_back("POST /test.html HTTP/1.1\r\n");
     raw_request.emplace_back("Host: example.org\r\n");

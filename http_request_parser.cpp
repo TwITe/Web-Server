@@ -1,4 +1,5 @@
 #include <regex>
+#include <iostream>
 #include "http_request_parser.h"
 
 using namespace std;
@@ -10,6 +11,7 @@ namespace webserver {
         string body;
 
         unsigned long index_start_of_body;
+
         for (unsigned long current_request_line_number = 0; current_request_line_number < raw_request.size(); current_request_line_number++) {
             if (raw_request[current_request_line_number] == "\r\n") {
                 index_start_of_body = current_request_line_number + 1;
@@ -20,9 +22,6 @@ namespace webserver {
         body = raw_request[index_start_of_body];
         //add "\r\n" to the end for correct spliting the body
         body += "\r\n";
-
-        string token;
-        istringstream iss(body);
 
         regex rx("[^\r\n]+\r\n");
         sregex_iterator formated_body_list(body.begin(), body.end(), rx), rxend;
@@ -37,23 +36,24 @@ namespace webserver {
     }
 
     http_request_parser::content_type http_request_parser::parse_content_type_header(const string& raw_content_type_header) {
-        pair <string, map<string, string>> parsed_parameterized_header = parameterized_header_parser.parse_parameterized_header(raw_content_type_header);
+        pair<string, map<string, string>> parsed_content_type_header = parameterized_header_parser.parse_parameterized_header(raw_content_type_header);
 
-        content_type converted_header{parsed_parameterized_header.first, parsed_parameterized_header.second};
+        content_type converted_header{parsed_content_type_header.first, parsed_content_type_header.second};
 
         return converted_header;
     }
 
     http_request_parser::content_disposition http_request_parser::parse_content_disposition_header(const string& raw_content_disposition_header) {
-        pair <string, map<string, string>> parsed_parameterized_header = parameterized_header_parser.parse_parameterized_header(raw_content_disposition_header);
+        pair<string, map<string, string>> parsed_content_disposition_header = parameterized_header_parser.parse_parameterized_header(raw_content_disposition_header);
 
-        content_disposition converted_header{parsed_parameterized_header.first, parsed_parameterized_header.second};
+        content_disposition converted_header{parsed_content_disposition_header.first, parsed_content_disposition_header.second};
 
         return converted_header;
     }
 
     void http_request_parser::parse_plaintext_body(http_request& post_request, const vector<string>& raw_request_body) {
         int line_count = 0;
+
         for (const auto& current_line : raw_request_body) {
             post_request.add_request_body_field("line " + to_string(line_count), current_line);
             line_count++;
@@ -61,7 +61,7 @@ namespace webserver {
     }
 
     void http_request_parser::parse_urlencoded_body(http_request &post_request, const vector<string> &raw_request_body) {
-        char tuples_delimiter = '&';
+        char parameters_delimiter = '&';
         char key_value_delimiter = '=';
 
         string key;
@@ -71,7 +71,7 @@ namespace webserver {
 
         for (const auto& current_line : raw_request_body) {
             for (const auto& current_char : current_line) {
-                if (current_char == tuples_delimiter) {
+                if (current_char == parameters_delimiter) {
                     key_appeared = true;
 
                     post_request.add_request_body_field(key, value);
@@ -96,15 +96,15 @@ namespace webserver {
 
 
 
-    bool http_request_parser::check_if_current_request_body_line_is_end_boundary(const string &line, const string &boundary) {
+    bool http_request_parser::check_if_current_request_body_line_is_end_boundary(const string& line, const string& boundary) {
         return line.find("--" + boundary + "--") == 0;
     }
 
-    bool http_request_parser::check_if_current_request_body_line_is_boundary(const string &line, const string& boundary) {
+    bool http_request_parser::check_if_current_request_body_line_is_boundary(const string& line, const string& boundary) {
         return line.find("--" + boundary) == 0;
     }
 
-    void http_request_parser::parse_formdata_body(http_request &post_request, const vector<string> &raw_request_body, const string& boundary) {
+    void http_request_parser::parse_formdata_body(http_request &post_request, const vector<string>& raw_request_body, const string& boundary) {
         string key;
         string value;
 
@@ -249,8 +249,10 @@ namespace webserver {
         string headers_and_body_delimiter = "\r\n";
         char header_type_and_value_delimiter = ':';
 
+        unsigned int index_start_of_headers = 1;
+
         //парсинг начинается со второй строчки, где и начинаются хэдеры
-        for (auto current_message_line = raw_http_request.begin() + 1; *current_message_line != headers_and_body_delimiter; current_message_line++) {
+        for (auto current_message_line = raw_http_request.begin() + index_start_of_headers; *current_message_line != headers_and_body_delimiter; current_message_line++) {
 
             string current_header_type;
             string current_header_value;
@@ -260,9 +262,17 @@ namespace webserver {
                     current_header_type.push_back((*current_message_line)[current_char_postion]);
                 }
                 else {
-                    size_t value_start_position = current_char_postion + 2;
-                    size_t value_end_position = current_message_line->size() - 1;
-                    current_header_value = current_message_line->substr(value_start_position, value_end_position - value_start_position - 1);
+                    size_t value_start_position = current_char_postion + 1;
+                    while ((*current_message_line)[value_start_position] == ' ') {
+                        value_start_position++;
+                    }
+
+                    current_header_value = current_message_line->substr(value_start_position);
+
+                    //remove \r\n from the end of header value
+                    current_header_value.pop_back();
+                    current_header_value.pop_back();
+
                     break;
                 }
             }
@@ -284,7 +294,7 @@ namespace webserver {
         const http_header& content_type_header = post_request.get_header("Content-Type");
 
         if (content_type_header.type == "Error") {
-            throw runtime_error("No Content-Type header given to parse request body");
+            cerr << "No Content-Type header was given to parse request body";
         }
 
         string content_type_value = content_type_header.value;

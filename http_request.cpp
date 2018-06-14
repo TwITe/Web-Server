@@ -14,7 +14,11 @@ namespace webserver {
         http_version = client_http_version;
     }
 
-    void http_request::add_http_request_param(request_param& client_request_param) {
+    void http_request::add_request_body_field(const string& name, const string& value) {
+        request_body.emplace(name, value);
+    }
+
+    void http_request::add_http_request_param(const request_param& client_request_param) {
         request_params.push_back(client_request_param);
     }
 
@@ -24,6 +28,16 @@ namespace webserver {
 
     const vector<http_header>& http_request::get_headers() const {
         return headers;
+    }
+
+    const http_header http_request::get_header(const string& header_name) const {
+        for (const auto& current_header : headers) {
+            if (current_header.type == header_name) {
+                return current_header;
+            }
+        }
+        http_header error_header{"Error", ""};
+        return error_header;
     }
 
     const vector<request_param> http_request::get_request_params() const {
@@ -44,19 +58,5 @@ namespace webserver {
 
     const string& http_request::get_request_http_version() const {
         return http_version;
-    }
-
-    void http_request::add_request_body_field(const string &name, const string &value) {
-        request_body.emplace(name, value);
-    }
-
-    const http_header http_request::get_header(const string& header_name) {
-        for (const auto& current_header : headers) {
-            if (current_header.type == header_name) {
-                return current_header;
-            }
-        }
-        http_header error_header{"Error", ""};
-        return error_header;
     }
 }

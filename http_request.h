@@ -41,13 +41,13 @@ namespace webserver {
 
         void add_request_body_field(const string& name, const string& value);
 
-        void add_http_request_param(request_param& client_request_param);
+        void add_http_request_param(const request_param& client_request_param);
 
         void add_http_request_header(http_header& client_request_header);
 
         const vector<http_header>& get_headers() const;
 
-        const http_header get_header(const string& header_name);
+        const http_header get_header(const string& header_name) const;
 
         const vector<request_param> get_request_params() const;
 

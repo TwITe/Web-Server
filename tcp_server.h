@@ -22,7 +22,7 @@ namespace webserver {
     private:
         unsigned short int PORT;
 
-        const unsigned int allowed_connections_number;
+        unsigned int allowed_connections_number;
 
         int listener_socket;
 
@@ -36,7 +36,7 @@ namespace webserver {
 
         mutex mx;
     public:
-        tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, int allowed_connections_number);
+        tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, unsigned int allowed_connections_number);
 
         void start();
 

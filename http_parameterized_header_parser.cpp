@@ -16,29 +16,31 @@ namespace webserver {
     pair<string, map<string, string>> http_request_parameterized_header_parser::parse_parameterized_header(const string& raw_parameterized_header) {
         pair<string, map<string, string>> parsed_parameterized_header;
 
-        size_t index = raw_parameterized_header.find(';');
+        char parameters_delimiter = ';';
 
-        string type = (index != string::npos) ? raw_parameterized_header.substr(0, index) : raw_parameterized_header;
+        size_t index_begin_of_new_parameter = raw_parameterized_header.find(parameters_delimiter);
+
+        string type = (index_begin_of_new_parameter != string::npos) ? raw_parameterized_header.substr(0, index_begin_of_new_parameter) : raw_parameterized_header;
 
         set_parameterized_header_type(parsed_parameterized_header, type);
 
         //parse parameters
-        if (index != string::npos) {
+        if (index_begin_of_new_parameter != string::npos) {
+            string parameter;
             string key;
             string value;
-            string parameter;
 
             char key_value_delimiter = '=';
 
-            size_t begin_of_parameter = index + 1;
+            size_t begin_of_parameter = index_begin_of_new_parameter + 1;
             size_t end_of_parameter;
 
             while(raw_parameterized_header[begin_of_parameter] == ' ') {
                 begin_of_parameter++;
             }
 
-            while ((index = raw_parameterized_header.find(';', index + 1)) != string::npos) {
-                end_of_parameter = index;
+            while ((index_begin_of_new_parameter = raw_parameterized_header.find(';', index_begin_of_new_parameter + 1)) != string::npos) {
+                end_of_parameter = index_begin_of_new_parameter;
                 parameter = raw_parameterized_header.substr(begin_of_parameter, end_of_parameter - begin_of_parameter);
 
                 key = parameter.substr(0, parameter.find(key_value_delimiter));
