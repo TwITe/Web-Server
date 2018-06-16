@@ -36,7 +36,7 @@ namespace webserver {
                 return current_header;
             }
         }
-        http_header error_header{"Error", ""};
+        http_header error_header{"", ""};
         return error_header;
     }
 
