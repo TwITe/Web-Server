@@ -77,7 +77,7 @@ TEST_CASE("Resource Not Found Test", "Get Request Tests") {
     REQUIRE(expected_body_text == received_response.text);
     REQUIRE(404 == received_response.status_code);
     REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE("9" == received_response.header["Content-Length"]);
+    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
 TEST_CASE("Resource Found Test", "Get Request Tests") {
@@ -88,7 +88,7 @@ TEST_CASE("Resource Found Test", "Get Request Tests") {
     REQUIRE(expected_body_text == received_response.text);
     REQUIRE(200 == received_response.status_code);
     REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE("13" == received_response.header["Content-Length"]);
+    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
 TEST_CASE("Payload Single parameter", "UrlEncoded Post Tests") {
