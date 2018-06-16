@@ -19,7 +19,10 @@ namespace webserver {
             }
         }
 
-        body = raw_request[index_start_of_body];
+        for (unsigned long current_request_line_number = index_start_of_body; current_request_line_number < raw_request.size(); current_request_line_number++) {
+            body += raw_request[current_request_line_number];
+        }
+
         //add "\r\n" to the end for correct spliting the body
         body += "\r\n";
 
@@ -49,12 +52,6 @@ namespace webserver {
         content_disposition converted_header{parsed_content_disposition_header.first, parsed_content_disposition_header.second};
 
         return converted_header;
-    }
-
-    void http_request_parser::parse_plaintext_body(http_request& post_request, const vector<string>& raw_request_body) {
-        for (const auto& current_line : raw_request_body) {
-            post_request.add_request_body_field("", current_line);
-        }
     }
 
     void http_request_parser::parse_urlencoded_body(http_request &post_request, const vector<string> &raw_request_body) {
@@ -250,7 +247,6 @@ namespace webserver {
 
         //парсинг начинается со второй строчки, где и начинаются хэдеры
         for (auto current_message_line = raw_http_request.begin() + index_start_of_headers; *current_message_line != headers_and_body_delimiter; current_message_line++) {
-
             string current_header_type;
             string current_header_value;
 
@@ -266,14 +262,18 @@ namespace webserver {
 
                     current_header_value = current_message_line->substr(value_start_position);
 
+                    current_header_value.pop_back();
+                    current_header_value.pop_back();
+
+                    http_header current_header;
+                    current_header.type = current_header_type;
+                    current_header.value = current_header_value;
+
+                    request.add_http_request_header(current_header);
+
                     break;
                 }
             }
-
-            http_header current_header;
-            current_header.type = current_header_type;
-            current_header.value = current_header_value;
-            request.add_http_request_header(current_header);
         }
     }
 
@@ -286,7 +286,7 @@ namespace webserver {
 
         const http_header& content_type_header = post_request.get_header("Content-Type");
 
-        if (content_type_header.type == "Error") {
+        if (content_type_header.value == "") {
             cerr << "No Content-Type header was given to parse request body";
         }
 
@@ -296,9 +296,6 @@ namespace webserver {
 
         if (obj.type == "application/x-www-form-urlencoded") {
             parse_urlencoded_body(post_request, raw_request_body);
-        }
-        if (obj.type == "text/plain" ) {
-            parse_plaintext_body(post_request, raw_request_body);
         }
         else {
             parse_formdata_body(post_request, raw_request_body, obj.parameters["boundary"]);

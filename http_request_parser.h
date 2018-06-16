@@ -50,8 +50,6 @@ namespace webserver {
 
         void parse_formdata_body(http_request& post_request, const vector<string>& raw_request_body, const string& boundary);
 
-        void parse_plaintext_body(http_request& post_request, const vector<string>& raw_request_body);
-
         void parse_post_request(http_request& post_request, const vector<string>& raw_request);
     public:
         http_request parse_request(const vector<string> &raw_request);
