@@ -52,11 +52,8 @@ namespace webserver {
     }
 
     void http_request_parser::parse_plaintext_body(http_request& post_request, const vector<string>& raw_request_body) {
-        int line_count = 0;
-
         for (const auto& current_line : raw_request_body) {
-            post_request.add_request_body_field("line " + to_string(line_count), current_line);
-            line_count++;
+            post_request.add_request_body_field("", current_line);
         }
     }
 
@@ -268,10 +265,6 @@ namespace webserver {
                     }
 
                     current_header_value = current_message_line->substr(value_start_position);
-
-                    //remove \r\n from the end of header value
-                    current_header_value.pop_back();
-                    current_header_value.pop_back();
 
                     break;
                 }
