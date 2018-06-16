@@ -12,6 +12,7 @@
 #include "http_request_validator.h"
 #include "http_response_builder.h"
 #include <map>
+#include <regex>
 
 using namespace std;
 //Реализация простого веб-сервера.
@@ -47,24 +48,16 @@ namespace webserver {
             vector<string> message_fields;
             string buffer;
 
-            for (auto it = raw_client_message.begin(); it != raw_client_message.end(); it++) {
-                if (*it == '\r' && *(it + 1) == '\n') {
-                    message_fields.emplace_back("\r\n");
-                    it+=1;
-                }
-                else {
-                    buffer.push_back(*it);
-                    if ((*(it + 1) == '\r' && *(it + 2) == '\n')) {
-                        message_fields.emplace_back(buffer);
-                        buffer.clear();
-                        it+=2;
-                    }
+            //add "\r\n" to the end for correct spliting of the client message
+            raw_client_message += "\r\n";
 
-                    if (it + 1 == raw_client_message.end()) {
-                        message_fields.emplace_back(buffer);
-                        buffer.clear();
-                    }
-                }
+            regex rx("[^\r\n]+\r\n|\r\n");
+            sregex_iterator formated_body_list(raw_client_message.begin(), raw_client_message.end(), rx), rxend;
+
+            while(formated_body_list != rxend) {
+                const string& current_line = formated_body_list->str();
+                message_fields.emplace_back(current_line.substr(0));
+                ++formated_body_list;
             }
 
             http_request request = parser.parse_request(message_fields);
