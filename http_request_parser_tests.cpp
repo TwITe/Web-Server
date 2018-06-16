@@ -54,6 +54,27 @@ TEST_CASE("ParseRequestLine_RawRequest_ParsedRequestLine") {
     REQUIRE(proper_request.get_request_http_version() == received_request.get_request_http_version());
 }
 
+TEST_CASE("ParsePlainTextRequestBody_RawPlainText_ParsedPlainTextBody", "Parser") {
+    vector<string> raw_request;
+
+    string request_body = "Hello, World!";
+    raw_request.emplace_back("POST / HTTP/1.1\r\n");
+    raw_request.emplace_back("Host: foo.com\r\n");
+    raw_request.emplace_back("Content-Type: plain/text");
+    raw_request.emplace_back("Content-Length: 13\r\n");
+    raw_request.emplace_back("\r\n");
+    raw_request.emplace_back(request_body);
+
+    webserver::http_request proper_request;
+
+    proper_request.add_request_body_field("", "Hello, World!");
+
+    webserver::http_request_parser parser;
+    webserver::http_request received_request = parser.parse_request(raw_request);
+
+    REQUIRE(proper_request.get_request_body() == received_request.get_request_body());
+}
+
 TEST_CASE("ParseUrlencodedRequestBody_RawUrlencodedBody_ParsedUrlencodedBody", "Parser") {
     vector<string> raw_request;
 
