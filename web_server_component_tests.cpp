@@ -4,13 +4,12 @@
 #include "web_server.h"
 #include <vector>
 #include <thread>
-#include <signal.h>
 using namespace cpr;
 
 const unsigned short int PORT = 8080;
 webserver::web_server* server;
 
-TEST_CASE("Run server", "Health Check Test") {
+TEST_CASE("Run server", "[Component Tests][Health Check Tests]") {
     _Pragma("GCC diagnostic push")
     _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
     function<webserver::http_response(webserver::http_request)> transform_get_request = [&](webserver::http_request request) {
@@ -88,12 +87,10 @@ TEST_CASE("Run server", "Health Check Test") {
     thread server_run([&]{server->start();});
     server_run.detach();
 
-    while (Get(cpr::Url("http://localhost:8080/is_server_up")).status_code != 200) {
-        continue;
-    }
+    while (Get(cpr::Url("http://localhost:8080/is_server_up")).status_code != 200) {}
 }
 
-TEST_CASE("Resource Not Found Test", "Get Request Tests") {
+TEST_CASE("Resource Not Found Test", "[Component Tests][Get Request Tests]") {
     std::string expected_body_text = "Not Found";
 
     auto received_response = Get(cpr::Url{"http://localhost:8080/error_url"});
@@ -104,7 +101,7 @@ TEST_CASE("Resource Not Found Test", "Get Request Tests") {
     REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
-TEST_CASE("Resource Found Test", "Get Request Tests") {
+TEST_CASE("Resource Found Test", "[Component Tests][Get Request Tests]") {
     std::string expected_body_text = "Hello, World!";
 
     auto received_response = Get(cpr::Url{"http://localhost:8080/index_get"});
@@ -115,7 +112,7 @@ TEST_CASE("Resource Found Test", "Get Request Tests") {
     REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
-TEST_CASE("Payload Single parameter", "UrlEncoded Post Tests") {
+TEST_CASE("Payload Single parameter", "[Component Tests][UrlEncoded Post Tests]") {
     string expected_body_text = "say: Hi";
 
     auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Payload{{"say", "Hi"}});
@@ -126,7 +123,7 @@ TEST_CASE("Payload Single parameter", "UrlEncoded Post Tests") {
     REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
-TEST_CASE("Payload Multiple parameters", "UrlEncoded Post Tests") {
+TEST_CASE("Payload Multiple parameters", "[Component Tests][UrlEncoded Post Tests]") {
     string expected_body_text = "say: Hi\r\n"
                                 "to: mom";
 
@@ -138,7 +135,7 @@ TEST_CASE("Payload Multiple parameters", "UrlEncoded Post Tests") {
     REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
-TEST_CASE("Multipart Single Subpart", "FormData Post Tests") {
+TEST_CASE("Multipart Single Subpart", "[Component Tests][FormData Post Tests]") {
     string expected_body_text = "say: Hi";
 
     auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Multipart{{"say", "Hi"}});
@@ -149,7 +146,7 @@ TEST_CASE("Multipart Single Subpart", "FormData Post Tests") {
     REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
-TEST_CASE("Multipart Multiple Subparts", "FormData Post Tests") {
+TEST_CASE("Multipart Multiple Subparts", "[Component Tests][FormData Post Tests]") {
     string expected_body_text = "say: Hi\r\n"
                                 "to: mom";
 
@@ -161,10 +158,10 @@ TEST_CASE("Multipart Multiple Subparts", "FormData Post Tests") {
     REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
 }
 
-TEST_CASE("Terminate Server") {
+TEST_CASE("Terminate Server", "[Component Tests][Health Check Tests]") {
     server->stop();
 
-    auto received_response = Post(cpr::Url{"http://localhost:8080/is_server_up"});
+    auto received_response = Get(cpr::Url{"http://localhost:8080/is_server_up"});
 
     REQUIRE(received_response.error.code == cpr::ErrorCode::CONNECTION_FAILURE);
 }
