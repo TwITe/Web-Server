@@ -53,13 +53,13 @@ namespace webserver {
         int response_status_code = response.get_response_code();
         const string& response_reason_phrase = reason_phrases[response_status_code];
 
-        string response_status_line = response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase + "\r\n";
+        string response_status_line = response_http_version + " " + to_string(response_status_code) + " " + response_reason_phrase;
 
         return response_status_line;
     }
 
     void http_response_builder::add_response_status_line(const http_response& response, string& converted_to_string_response) {
-        converted_to_string_response += build_response_status_line(response);
+        converted_to_string_response += build_response_status_line(response) + "\r\n";
     }
 
     void http_response_builder::add_response_header_fields(const http_response &response,
