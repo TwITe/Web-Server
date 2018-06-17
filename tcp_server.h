@@ -26,6 +26,8 @@ namespace webserver {
 
         int listener_socket;
 
+        bool accept_connections;
+
         queue<client*> clients_queue;
 
         struct sockaddr_in server_address{};

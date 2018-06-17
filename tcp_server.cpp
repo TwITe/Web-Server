@@ -2,7 +2,9 @@
 
 namespace webserver {
     tcp_server::tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, unsigned int allowed_connections_number) :
-            PORT(PORT), allowed_connections_number(allowed_connections_number), convert_client_message(convert_client_message) {}
+            PORT(PORT), allowed_connections_number(allowed_connections_number), convert_client_message(convert_client_message) {
+        accept_connections = true;
+    }
 
     void tcp_server::start() {
         memset(&server_address, 0, sizeof(server_address));
@@ -41,7 +43,7 @@ namespace webserver {
                 return index;
             }
         }
-        cerr << "Client with id" << cl->get_id() << " not found" << endl;
+        cerr << "Client with id " << cl->get_id() << " not found" << endl;
         return -1;
     }
 
@@ -140,12 +142,12 @@ namespace webserver {
 
         socklen_t cli_size = sizeof(sockaddr_in);
 
-        while (true) {
+        while (accept_connections) {
             current_client = new client();
 
             current_client->sock = accept(listener_socket, (struct sockaddr *) &server_address, &cli_size);
 
-            if (current_client->sock != -1) {
+            if (current_client->sock != -1 && accept_connections) {
                 cout << "----------------------------" << endl << endl;
                 cout << "[Server] New connection accepted" << endl << endl;
                 cout << "----------------------------" << endl << endl;
@@ -169,22 +171,22 @@ namespace webserver {
     }
 
     void tcp_server::stop() {
+        accept_connections = false;
+        close(listener_socket);
+
+        //mx.lock();
         for (auto& cl : clients) {
             // client disconnect
             cout << "[Server Stop] Connection with client with id " << cl.get_id() << " was closed" << endl;
             close(cl.sock);
 
             //remove client from the clients <vector>
-            mx.lock();
-
             int client_index = find_client_index(&cl);
             clients.erase(clients.begin() + client_index);
             cout << "[Server Stop] Client with id " << cl.get_id() << " was removed from the clients list" << endl;
-
-            mx.unlock();
         }
+        //mx.unlock();
 
-        close(listener_socket);
         cout << "[Server Stop] Main server's listener socket has been closed" << endl;
         cout << "[Server Stop] Server has been terminated" << endl;
     }
