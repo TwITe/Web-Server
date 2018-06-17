@@ -18,9 +18,9 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
 #        catch main include
         provide_catch_main.cpp
 #        ------------------
-        http_request_parser_tests.cpp
-        http_parameterized_header_parser_tests.cpp
-        http_router_tests.cpp
+#        http_request_parser_tests.cpp
+#        http_parameterized_header_parser_tests.cpp
+#        http_router_tests.cpp
 #
 #        serverclient tests
 #        ------------------

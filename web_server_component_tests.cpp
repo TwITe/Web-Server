@@ -8,6 +8,7 @@ using namespace cpr;
 
 const unsigned short int PORT = 8080;
 webserver::web_server* server;
+thread server_run;
 
 TEST_CASE("Run server", "[Component Tests][Health Check Tests]") {
     _Pragma("GCC diagnostic push")
@@ -84,7 +85,7 @@ TEST_CASE("Run server", "[Component Tests][Health Check Tests]") {
 
     server = new webserver::web_server(PORT, handlers);
 
-    thread server_run([&]{server->start();});
+    server_run = thread([&]{server->start();});
     server_run.detach();
 
     while (Get(cpr::Url("http://localhost:8080/is_server_up")).status_code != 200) {}
