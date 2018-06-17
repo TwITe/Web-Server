@@ -4,72 +4,96 @@
 #include "web_server.h"
 #include <vector>
 #include <thread>
+#include <signal.h>
 using namespace cpr;
 
 const unsigned short int PORT = 8080;
+webserver::web_server* server;
 
-_Pragma("GCC diagnostic push")
-_Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
-function<webserver::http_response(webserver::http_request)> transform_get_request = [&](webserver::http_request request) {
-    webserver::http_response response;
+TEST_CASE("Run server", "Health Check Test") {
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
+    function<webserver::http_response(webserver::http_request)> transform_get_request = [&](webserver::http_request request) {
+        webserver::http_response response;
 
-    string response_body = "Hello, World!";
+        string response_body = "Hello, World!";
 
-    response.set_response_body(response_body);
-    response.set_response_http_code(200);
-    response.set_response_length(response_body.size());
+        response.set_response_body(response_body);
+        response.set_response_http_code(200);
+        response.set_response_length(response_body.size());
 
-    vector<webserver::http_header> headers;
-    headers.push_back(webserver::http_header{"Content-Type", "text/plain"});
-    response.set_response_headers(headers);
+        vector<webserver::http_header> headers;
+        headers.push_back(webserver::http_header{"Content-Type", "text/plain"});
+        response.set_response_headers(headers);
 
-    return response;
-};
-_Pragma("GCC diagnostic pop")
+        return response;
+    };
+    _Pragma("GCC diagnostic pop")
 
-webserver::web_handler get_web_handler("/index_get", "GET", transform_get_request);
+    webserver::web_handler get_web_handler("/index_get", "GET", transform_get_request);
 
-_Pragma("GCC diagnostic push")
-_Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
-function<webserver::http_response(webserver::http_request)> transform_post_request_reflect_message = [&](webserver::http_request request) {
-    webserver::http_response response;
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
+    function<webserver::http_response(webserver::http_request)> transform_post_request_reflect_message = [&](webserver::http_request request) {
+        webserver::http_response response;
 
-    const map<string, string>& request_body = request.get_request_body();
+        const map<string, string>& request_body = request.get_request_body();
 
-    string response_body;
+        string response_body;
 
-    for (const auto& current_tuple : request_body) {
-        response_body += current_tuple.first + ": " + current_tuple.second + "\r\n";
-    }
+        for (const auto& current_tuple : request_body) {
+            response_body += current_tuple.first + ": " + current_tuple.second + "\r\n";
+        }
 
-    response_body.pop_back();
-    response_body.pop_back();
+        response_body.pop_back();
+        response_body.pop_back();
 
-    response.set_response_body(response_body);
-    response.set_response_http_code(200);
-    response.set_response_length(response_body.size());
+        response.set_response_body(response_body);
+        response.set_response_http_code(200);
+        response.set_response_length(response_body.size());
 
-    vector<webserver::http_header> headers;
+        vector<webserver::http_header> headers;
 
-    headers.push_back(webserver::http_header{"Content-Type", "text/plain"});
+        headers.push_back(webserver::http_header{"Content-Type", "text/plain"});
 
-    response.set_response_headers(headers);
+        response.set_response_headers(headers);
 
-    return response;
-};
-_Pragma("GCC diagnostic pop")
+        return response;
+    };
+    _Pragma("GCC diagnostic pop")
 
-webserver::web_handler post_reflect_web_handler("/reflect_message", "POST", transform_post_request_reflect_message);
+    webserver::web_handler post_reflect_web_handler("/reflect_message", "POST", transform_post_request_reflect_message);
 
-vector<webserver::web_handler> handlers{get_web_handler, post_reflect_web_handler};
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
+    function<webserver::http_response(webserver::http_request)> health_check = [&](webserver::http_request request) {
+        webserver::http_response response;
 
-webserver::web_server server(PORT, handlers);
+        string response_body = "Hello, World!";
 
+        response.set_response_body(response_body);
+        response.set_response_http_code(200);
+        response.set_response_length(response_body.length());
 
-TEST_CASE("Resource Not Found Test", "Get Request Tests") {
-    thread server_run([]{server.start();});
+        return response;
+    };
+    _Pragma("GCC diagnostic pop")
+
+    webserver::web_handler health_check_handler("/is_server_up", "GET", health_check);
+
+    vector<webserver::web_handler> handlers{get_web_handler, post_reflect_web_handler, health_check_handler};
+
+    server = new webserver::web_server(PORT, handlers);
+
+    thread server_run([&]{server->start();});
     server_run.detach();
 
+    while (Get(cpr::Url("http://localhost:8080/is_server_up")).status_code != 200) {
+        continue;
+    }
+}
+
+TEST_CASE("Resource Not Found Test", "Get Request Tests") {
     std::string expected_body_text = "Not Found";
 
     auto received_response = Get(cpr::Url{"http://localhost:8080/error_url"});
@@ -135,4 +159,12 @@ TEST_CASE("Multipart Multiple Subparts", "FormData Post Tests") {
     REQUIRE(200 == received_response.status_code);
     REQUIRE("text/plain" == received_response.header["Content-Type"]);
     REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
+}
+
+TEST_CASE("Terminate Server") {
+    server->stop();
+
+    auto received_response = Post(cpr::Url{"http://localhost:8080/is_server_up"});
+
+    REQUIRE(received_response.error.code == cpr::ErrorCode::CONNECTION_FAILURE);
 }
