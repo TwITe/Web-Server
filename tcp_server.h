@@ -26,7 +26,7 @@ namespace webserver {
 
         int listener_socket;
 
-        bool accept_connections;
+        volatile bool accept_connections;
 
         struct sockaddr_in server_address{};
 
