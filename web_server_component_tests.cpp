@@ -87,7 +87,7 @@ TEST_CASE("Run server", "[Component Tests][Health Check Tests]") {
     thread server_run = thread([&]{server->start();});
     server_run.detach();
 
-    while (Get(cpr::Url("http://localhost:8080/is_server_up")).status_code != 200) {}
+    while (Get(cpr::Url("http://localhost:8080/is_server_up")).error.code != cpr::ErrorCode::OK) {}
 }
 
 TEST_CASE("Resource Not Found Test", "[Component Tests][Get Request Tests]") {
@@ -174,7 +174,7 @@ TEST_CASE("Shut Down The Server", "[Server Shutdown") {
     thread server_run = thread([&]{server->start();});
     server_run.detach();
 
-    while (Get(cpr::Url("http://localhost:8080/is_server_up")).status_code != 200) {}
+    while (Get(cpr::Url("http://localhost:8080/is_server_up")).error.code != cpr::ErrorCode::OK) {}
 
     REQUIRE(Get(cpr::Url("http://localhost:8080/is_server_up")).status_code == 200);
 }
