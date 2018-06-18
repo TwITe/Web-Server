@@ -152,6 +152,7 @@ namespace webserver {
 
     void tcp_server::stop() {
         accept_connections = false;
+
         close(listener_socket);
         cout << "[Server Stop] Main server's listener socket has been closed" << endl;
         cout << "[Server Stop] Server has been terminated" << endl;
@@ -161,11 +162,6 @@ namespace webserver {
             // client disconnect
             cout << "[Server Stop] Connection with client with id " << cl.get_id() << " has been closed" << endl;
             close(cl.sock);
-
-            //remove client from the clients <vector>
-            int client_index = find_client_index(&cl);
-            clients.erase(clients.begin() + client_index);
-            cout << "[Server Stop] Client with id " << cl.get_id() << " has been removed from the clients list" << endl;
         }
         mx.unlock();
     }
