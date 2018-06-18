@@ -53,14 +53,14 @@ namespace webserver {
 
         cl->set_id(static_cast<int>(clients.size()));
         clients.push_back(*cl);
-        cout << "New client with id " << cl->get_id() << " was added to the clients list" << endl << endl;
+        cout << "New client with id " << cl->get_id() << " has been added to the clients list" << endl << endl;
 
         mx.unlock();
 
         char read_buffer[1024];
         ssize_t message_size;
         string received_message;
-        while (true) {
+        while (accept_connections) {
             memset(&read_buffer, 0, sizeof(read_buffer));
             received_message.clear();
 
@@ -68,7 +68,7 @@ namespace webserver {
 
             if (message_size == 0) {
                 // client disconnect
-                cout << "Client with id " << cl->get_id() << " has disconnected" << endl;
+                cout << "Client with id " << cl->get_id() << " has been disconnected" << endl;
                 close(cl->sock);
 
                 //remove client from the clients <vector>
@@ -76,25 +76,27 @@ namespace webserver {
 
                 int client_index = find_client_index(cl);
                 clients.erase(clients.begin() + client_index);
-                cout << "Client with id " << cl->get_id() << " was removed from the clients list" << endl;
+                cout << "Client with id " << cl->get_id() << " has been removed from the clients list" << endl;
 
                 mx.unlock();
 
                 delete cl;
 
-                // place was freed, handle clients in queue
-                handle_awaiting_clients();
-
                 break;
             }
             if (message_size == -1) {
-                cerr << "Error while receiving message from client with id " << cl->get_id() << endl;
+                if (!accept_connections) {
+                    cerr << "Unable to receive message from client with id " << cl->get_id() << ". Server has been shut down. Stop receiving messages from this client" << endl;
+                }
+                else {
+                    cerr << "Error while receiving message from client with id " << cl->get_id() << endl;
+                }
             }
             else {
                 //message received succesfully
                 //TODO: Сделать чтение буферами по 1024 байта
 
-                cout << "[Server] Client's message received" << endl;
+                cout << "[Server] Client's message has been received" << endl;
                 cout << "[Server] Client's message: " << endl;
                 cout << "----------------------------" << endl;
                 cout << read_buffer << endl;
@@ -115,26 +117,10 @@ namespace webserver {
                 cout << response_message << endl;
                 cout << "----------------------------" << endl << endl;
 
-                cout << "[Server] Message was sent to client" << endl << endl;
+                cout << "[Server] Message has been sent to client" << endl << endl;
                 cout << "============================" << endl << endl;
             }
         }
-    }
-
-    void tcp_server::handle_awaiting_clients() {
-        mx.lock();
-        if (!clients_queue.empty()) {
-
-            cout << "[Server] Handling awaiting clients" << endl << endl;
-
-            client* cl = clients_queue.front();
-
-            clients_queue.pop();
-
-            thread handling_thread(&tcp_server::connection_handler, this, cl);
-            handling_thread.detach();
-        }
-        mx.unlock();
     }
 
     void tcp_server::take_requests() {
@@ -149,18 +135,12 @@ namespace webserver {
 
             if (current_client->sock != -1 && accept_connections) {
                 cout << "----------------------------" << endl << endl;
-                cout << "[Server] New connection accepted" << endl << endl;
+                cout << "[Server] New connection has been accepted" << endl << endl;
                 cout << "----------------------------" << endl << endl;
 
 
-                if (clients.size() < allowed_connections_number) {
-                    thread handling_thread(&tcp_server::connection_handler, this, current_client);
-                    handling_thread.detach();
-                }
-                else {
-                    cout << "[Server] No free slots. Your place in queue is " << clients_queue.size() + 1 << ". Please stand by..." << endl;
-                    clients_queue.push(current_client);
-                }
+                thread handling_thread(&tcp_server::connection_handler, this, current_client);
+                handling_thread.detach();
             }
             else {
                 cout << "----------------------------" << endl << endl;
@@ -173,21 +153,20 @@ namespace webserver {
     void tcp_server::stop() {
         accept_connections = false;
         close(listener_socket);
+        cout << "[Server Stop] Main server's listener socket has been closed" << endl;
+        cout << "[Server Stop] Server has been terminated" << endl;
 
-        //mx.lock();
+        mx.lock();
         for (auto& cl : clients) {
             // client disconnect
-            cout << "[Server Stop] Connection with client with id " << cl.get_id() << " was closed" << endl;
+            cout << "[Server Stop] Connection with client with id " << cl.get_id() << " has been closed" << endl;
             close(cl.sock);
 
             //remove client from the clients <vector>
             int client_index = find_client_index(&cl);
             clients.erase(clients.begin() + client_index);
-            cout << "[Server Stop] Client with id " << cl.get_id() << " was removed from the clients list" << endl;
+            cout << "[Server Stop] Client with id " << cl.get_id() << " has been removed from the clients list" << endl;
         }
-        //mx.unlock();
-
-        cout << "[Server Stop] Main server's listener socket has been closed" << endl;
-        cout << "[Server Stop] Server has been terminated" << endl;
+        mx.unlock();
     }
 }

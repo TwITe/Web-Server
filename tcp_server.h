@@ -28,8 +28,6 @@ namespace webserver {
 
         bool accept_connections;
 
-        queue<client*> clients_queue;
-
         struct sockaddr_in server_address{};
 
         const function<string(string)>& convert_client_message;
@@ -47,8 +45,6 @@ namespace webserver {
         void connection_handler(client* cl);
 
         void take_requests();
-
-        void handle_awaiting_clients();
 
         int find_client_index(client* cl);
     };
