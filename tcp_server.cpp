@@ -64,7 +64,7 @@ namespace webserver {
             memset(&read_buffer, 0, sizeof(read_buffer));
             received_message.clear();
 
-            message_size = recv(cl->sock, read_buffer, sizeof(read_buffer), 0);
+            message_size = recv(cl->sock, read_buffer, sizeof(read_buffer) - 1, 0);
 
             if (message_size == 0) {
                 // client disconnect
@@ -91,10 +91,12 @@ namespace webserver {
                 else {
                     cerr << "Error while receiving message from client with id " << cl->get_id() << endl;
                 }
+                cerr << strerror(errno) << endl;
             }
             else {
                 //message received succesfully
-                //TODO: Сделать чтение буферами по 1024 байта
+                //TODO: Написать парсер, который будет проверять пришедшее сообщение на его полноту
+                //иначе читать в цикле сообщение дальше, добавляя пришедшую часть в прошлый буфер, только получив полный request можно обработать сообщение
 
                 cout << "[Server] Client's message has been received" << endl;
                 cout << "[Server] Client's message: " << endl;

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
+#include <cerrno>
 #include <stdexcept>
 #include "client.h"
 #include <queue>
