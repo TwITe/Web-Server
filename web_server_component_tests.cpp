@@ -163,8 +163,6 @@ TEST_CASE("Shut Down The Server", "[Server Shutdown") {
 
     auto r = Get(cpr::Url("http://localhost:8080/is_server_up"), cpr::Timeout(1000));
 
-    cout << r.error.message << endl;
-
     REQUIRE(r.error.code == cpr::ErrorCode::OPERATION_TIMEDOUT);
 
     delete server;
