@@ -59,7 +59,7 @@ namespace webserver {
 
         mx.unlock();
 
-        char read_buffer[64];
+        char read_buffer[1024];
         ssize_t message_size;
         string received_message;
 
@@ -104,8 +104,13 @@ namespace webserver {
                 mx.lock();
 
                 int client_index = find_client_index(cl);
-                clients.erase(clients.begin() + client_index);
-                cout << "Client with id " << cl->get_id() << " has been removed from the clients list" << endl;
+                if (client_index != -1) {
+                    clients.erase(clients.begin() + client_index);
+                    cout << "Client with id " << cl->get_id() << " has been removed from the clients vector" << endl;
+                }
+                else {
+                    cout << "Client was not found in the clients vector" << endl;
+                }
 
                 mx.unlock();
 
@@ -145,6 +150,7 @@ namespace webserver {
                 handling_thread.detach();
             }
             else {
+                delete current_client;
                 cout << "----------------------------" << endl << endl;
                 cout << "[Server] Socket accept failed" << endl << endl;
                 cout << "----------------------------" << endl << endl;
