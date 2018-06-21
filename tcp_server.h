@@ -46,11 +46,11 @@ namespace webserver {
 
         void stop();
     private:
-        void connection_handler(client* cl);
+        void connection_handler(shared_ptr<client> cl);
 
         void take_requests();
 
-        int find_client_index(client* cl);
+        int find_client_index(shared_ptr<client> cl);
     };
 }
 

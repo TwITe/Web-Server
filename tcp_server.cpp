@@ -39,7 +39,7 @@ namespace webserver {
         take_requests();
     }
 
-    int tcp_server::find_client_index(client* cl) {
+    int tcp_server::find_client_index(shared_ptr<client> cl) {
         for (unsigned int index = 0; index < clients.size(); index++) {
             if (clients[index].get_id() == cl->get_id()) {
                 return index;
@@ -49,7 +49,7 @@ namespace webserver {
         return -1;
     }
 
-    void tcp_server::connection_handler(client* cl) {
+    void tcp_server::connection_handler(shared_ptr<client> cl) {
         // add client to the clients <vector>
         mx.lock();
 
@@ -114,8 +114,6 @@ namespace webserver {
 
                 mx.unlock();
 
-                delete cl;
-
                 break;
             }
             if (message_size == -1) {
@@ -131,12 +129,12 @@ namespace webserver {
     }
 
     void tcp_server::take_requests() {
-        client* current_client;
+        shared_ptr<client> current_client;
 
         socklen_t cli_size = sizeof(sockaddr_in);
 
         while (accept_connections) {
-            current_client = new client();
+            current_client = make_shared<client>();
 
             current_client->sock = accept(listener_socket, (struct sockaddr *) &server_address, &cli_size);
 
@@ -150,7 +148,6 @@ namespace webserver {
                 handling_thread.detach();
             }
             else {
-                delete current_client;
                 cout << "----------------------------" << endl << endl;
                 cout << "[Server] Socket accept failed" << endl << endl;
                 cout << "----------------------------" << endl << endl;
