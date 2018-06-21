@@ -175,4 +175,6 @@ TEST_CASE("Shut Down The Server", "[Server Shutdown") {
     while (Get(cpr::Url("http://localhost:8080/is_server_up")).error.code != cpr::ErrorCode::OK) {}
 
     REQUIRE(Get(cpr::Url("http://localhost:8080/is_server_up")).status_code == 200);
+
+    delete server;
 }
