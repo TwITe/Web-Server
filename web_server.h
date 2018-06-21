@@ -39,7 +39,51 @@ namespace webserver {
 
         http_response_builder response_builder;
 
-        http_response generate_400_error_response(const http_request& request);
+        function<bool(string)> check_is_full_message = [](const string& client_message) -> bool {
+            map<string, string> headers;
+
+            unsigned long index_end_of_headers = client_message.find("\r\n\r\n");
+
+            if (index_end_of_headers != string::npos) {
+                index_end_of_headers += 4;
+
+                regex rx("[^\r\n]+\r\n");
+                sregex_iterator formated_headers_list(client_message.begin(), client_message.begin() + index_end_of_headers, rx), rxend;
+
+                while(formated_headers_list != rxend) {
+                    string current_header = formated_headers_list->str();
+
+                    unsigned long index_end_of_header_type = current_header.find(':');
+                    unsigned long index_start_of_header_value = index_end_of_header_type + 1;
+
+                    while (index_start_of_header_value == ' ') {
+                        index_start_of_header_value++;
+                    }
+
+                    string header_type = current_header.substr(0, index_end_of_header_type);
+                    string header_value = current_header.substr(index_start_of_header_value);
+
+                    for (auto& current_char : header_type) {
+                        current_char = tolower(current_char);
+                    }
+
+                    headers.emplace(header_type, header_value);
+                    formated_headers_list++;
+                }
+
+                if (!headers["content-length"].empty()) {
+                    unsigned long body_size = stol(headers["content-length"]);
+
+                    if (body_size != 0) {
+                        if (client_message.size() - index_end_of_headers != body_size) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        };
 
         function<string(string)> convert_client_message = [&](string raw_client_message) -> string {
             vector<string> message_fields;

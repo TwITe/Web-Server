@@ -31,13 +31,16 @@ namespace webserver {
 
         struct sockaddr_in server_address{};
 
+        const function<bool(string)>& is_full_message;
+
         const function<string(string)>& convert_client_message;
 
         vector<client> clients;
 
         mutex mx;
     public:
-        tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, unsigned int allowed_connections_number);
+        tcp_server(unsigned short int PORT, const function<bool(string)>& is_full_message,
+                   const function<string(string)>& convert_client_message, unsigned int allowed_connections_number);
 
         void start();
 

@@ -1,8 +1,10 @@
 #include "tcp_server.h"
 
 namespace webserver {
-    tcp_server::tcp_server(unsigned short int PORT, const function<string(string)>& convert_client_message, unsigned int allowed_connections_number) :
-            PORT(PORT), allowed_connections_number(allowed_connections_number), convert_client_message(convert_client_message) {
+    tcp_server::tcp_server(unsigned short int PORT, const function<bool(string)>& is_full_message,
+                           const function<string(string)>& convert_client_message, unsigned int allowed_connections_number) :
+            PORT(PORT), allowed_connections_number(allowed_connections_number), is_full_message(is_full_message),
+            convert_client_message(convert_client_message) {
         accept_connections = true;
     }
 
@@ -57,15 +59,42 @@ namespace webserver {
 
         mx.unlock();
 
-        char read_buffer[1024];
+        char read_buffer[32];
         ssize_t message_size;
         string received_message;
+
         while (accept_connections) {
             memset(&read_buffer, 0, sizeof(read_buffer));
-            received_message.clear();
 
-            message_size = recv(cl->sock, read_buffer, sizeof(read_buffer) - 1, 0);
+            if ((message_size = recv(cl->sock, read_buffer, sizeof(read_buffer) - 1, 0)) > 0) {
+                cout << "[Server] Client's message has been received" << endl;
+                cout << "[Server] Client's message: " << endl;
+                cout << "----------------------------" << endl;
+                cout << read_buffer << endl;
+                cout << "----------------------------" << endl;
 
+                received_message.append(read_buffer, message_size);
+
+                if (is_full_message(received_message)) {
+                    string response_message = convert_client_message(received_message);
+
+                    cout << "[Server] Server's response: " << endl;
+                    cout << "----------------------------" << endl;
+                    cout << response_message << endl;
+                    cout << "----------------------------" << endl << endl;
+
+                    if (send(cl->sock, response_message.c_str(), response_message.size(), 0) == -1) {
+                        cout << "[Server] Message sending to client with id " << cl->get_id() << " failed" << endl;
+                        cout << "============================" << endl << endl;
+                    }
+                    else {
+                        cout << "[Server] Message has been sent to client with id " << cl->get_id() << endl;
+                        cout << "============================" << endl << endl;
+                    }
+
+                    received_message.clear();
+                }
+            }
             if (message_size == 0) {
                 // client disconnect
                 cout << "Client with id " << cl->get_id() << " has been disconnected" << endl;
@@ -92,35 +121,6 @@ namespace webserver {
                     cerr << "Error while receiving message from client with id " << cl->get_id() << endl;
                 }
                 cerr << strerror(errno) << endl;
-            }
-            else {
-                //message received succesfully
-                //TODO: Написать парсер, который будет проверять пришедшее сообщение на его полноту
-                //иначе читать в цикле сообщение дальше, добавляя пришедшую часть в прошлый буфер, только получив полный request можно обработать сообщение
-
-                cout << "[Server] Client's message has been received" << endl;
-                cout << "[Server] Client's message: " << endl;
-                cout << "----------------------------" << endl;
-                cout << read_buffer << endl;
-                cout << "----------------------------" << endl;
-
-                for (unsigned int i = 0; i < message_size; i++) {
-                    received_message.push_back(read_buffer[i]);
-                }
-
-                string response_message = convert_client_message(received_message);
-
-                if (send(cl->sock, response_message.c_str(), response_message.size(), 0) == -1) {
-                    cout << "[Server] Message sending to client with id " << cl->get_id() << " failed" << endl;
-                }
-
-                cout << "[Server] Server's response: " << endl;
-                cout << "----------------------------" << endl;
-                cout << response_message << endl;
-                cout << "----------------------------" << endl << endl;
-
-                cout << "[Server] Message has been sent to client" << endl << endl;
-                cout << "============================" << endl << endl;
             }
         }
     }
