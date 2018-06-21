@@ -7,7 +7,7 @@
 using namespace cpr;
 
 const unsigned short int PORT = 8080;
-webserver::web_server* server;
+unique_ptr<webserver::web_server> server;
 
 _Pragma("GCC diagnostic push")
 _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
@@ -82,7 +82,7 @@ webserver::web_handler health_check_handler("/is_server_up", "GET", health_check
 vector<webserver::web_handler> handlers{get_web_handler, post_reflect_web_handler, health_check_handler};
 
 TEST_CASE("Run server", "[Component Tests][Health Check Tests]") {
-    server = new webserver::web_server(PORT, handlers);
+    server = make_unique<webserver::web_server>(PORT, handlers);
 
     thread server_run = thread([&]{server->start();});
     server_run.detach();
@@ -165,9 +165,7 @@ TEST_CASE("Shut Down The Server", "[Server Shutdown") {
 
     REQUIRE(r.error.code == cpr::ErrorCode::OPERATION_TIMEDOUT);
 
-    delete server;
-
-    server = new webserver::web_server(PORT, handlers);
+    server = make_unique<webserver::web_server>(PORT, handlers);
 
     thread server_run = thread([&]{server->start();});
     server_run.detach();
@@ -175,6 +173,4 @@ TEST_CASE("Shut Down The Server", "[Server Shutdown") {
     while (Get(cpr::Url("http://localhost:8080/is_server_up")).error.code != cpr::ErrorCode::OK) {}
 
     REQUIRE(Get(cpr::Url("http://localhost:8080/is_server_up")).status_code == 200);
-
-    delete server;
 }
