@@ -286,7 +286,7 @@ namespace webserver {
 
         const http_header& content_type_header = post_request.get_header("Content-Type");
 
-        if (content_type_header.value == "") {
+        if (content_type_header.value.empty()) {
             cerr << "No Content-Type header was given to parse request body";
         }
 

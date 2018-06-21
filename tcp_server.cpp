@@ -73,7 +73,7 @@ namespace webserver {
                 cout << read_buffer << endl;
                 cout << "----------------------------" << endl;
 
-                received_message.append(read_buffer, message_size);
+                received_message.append(read_buffer, static_cast<unsigned long>(message_size));
 
                 if (is_full_message(received_message)) {
                     string response_message = convert_client_message(received_message);
