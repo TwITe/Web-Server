@@ -95,10 +95,10 @@ TEST_CASE("Resource Not Found Test", "[Component Tests][Get Request Tests]") {
 
     auto received_response = Get(cpr::Url{"http://localhost:8080/error_url"});
 
-    REQUIRE(expected_body_text == received_response.text);
-    REQUIRE(404 == received_response.status_code);
-    REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
+    REQUIRE(received_response.text == expected_body_text);
+    REQUIRE(received_response.status_code == 404);
+    REQUIRE(received_response.header["Content-Type"] == "text/plain");
+    REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
 }
 
 TEST_CASE("Resource Found Test", "[Component Tests][Get Request Tests]") {
@@ -106,10 +106,10 @@ TEST_CASE("Resource Found Test", "[Component Tests][Get Request Tests]") {
 
     auto received_response = Get(cpr::Url{"http://localhost:8080/index_get"});
 
-    REQUIRE(expected_body_text == received_response.text);
-    REQUIRE(200 == received_response.status_code);
-    REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
+    REQUIRE(received_response.text == expected_body_text);
+    REQUIRE(received_response.status_code == 200);
+    REQUIRE(received_response.header["Content-Type"] == "text/plain");
+    REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
 }
 
 TEST_CASE("Payload Single parameter", "[Component Tests][UrlEncoded Post Tests]") {
@@ -117,10 +117,10 @@ TEST_CASE("Payload Single parameter", "[Component Tests][UrlEncoded Post Tests]"
 
     auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Payload{{"say", "Hi"}});
 
-    REQUIRE(expected_body_text == received_response.text);
-    REQUIRE(200 == received_response.status_code);
-    REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
+    REQUIRE(received_response.text == expected_body_text);
+    REQUIRE(received_response.status_code == 200);
+    REQUIRE(received_response.header["Content-Type"] == "text/plain");
+    REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
 }
 
 TEST_CASE("Payload Multiple parameters", "[Component Tests][UrlEncoded Post Tests]") {
@@ -129,10 +129,10 @@ TEST_CASE("Payload Multiple parameters", "[Component Tests][UrlEncoded Post Test
 
     auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Payload{{"say", "Hi"}, {"to", "mom"}});
 
-    REQUIRE(expected_body_text == received_response.text);
-    REQUIRE(200 == received_response.status_code);
-    REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
+    REQUIRE(received_response.text == expected_body_text);
+    REQUIRE(received_response.status_code == 200);
+    REQUIRE(received_response.header["Content-Type"] == "text/plain");
+    REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
 }
 
 TEST_CASE("Multipart Single Subpart", "[Component Tests][FormData Post Tests]") {
@@ -140,10 +140,10 @@ TEST_CASE("Multipart Single Subpart", "[Component Tests][FormData Post Tests]") 
 
     auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Multipart{{"say", "Hi"}});
 
-    REQUIRE(expected_body_text == received_response.text);
-    REQUIRE(200 == received_response.status_code);
-    REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
+    REQUIRE(received_response.text == expected_body_text);
+    REQUIRE(received_response.status_code == 200);
+    REQUIRE(received_response.header["Content-Type"] == "text/plain");
+    REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
 }
 
 TEST_CASE("Multipart Multiple Subparts", "[Component Tests][FormData Post Tests]") {
@@ -152,10 +152,10 @@ TEST_CASE("Multipart Multiple Subparts", "[Component Tests][FormData Post Tests]
 
     auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Multipart{{"say", "Hi"}, {"to", "mom"}});
 
-    REQUIRE(expected_body_text == received_response.text);
-    REQUIRE(200 == received_response.status_code);
-    REQUIRE("text/plain" == received_response.header["Content-Type"]);
-    REQUIRE(to_string(expected_body_text.length()) == received_response.header["Content-Length"]);
+    REQUIRE(received_response.text == expected_body_text);
+    REQUIRE(received_response.status_code == 200);
+    REQUIRE(received_response.header["Content-Type"] == "text/plain");
+    REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
 }
 
 TEST_CASE("Shut Down The Server", "[Server Shutdown") {
