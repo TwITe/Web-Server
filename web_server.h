@@ -42,13 +42,14 @@ namespace webserver {
         function<bool(string)> check_is_full_message = [](const string& client_message) -> bool {
             map<string, string> headers;
 
+            unsigned long index_start_of_headers = client_message.find("\r\n") + 2;
             unsigned long index_end_of_headers = client_message.find("\r\n\r\n");
 
             if (index_end_of_headers != string::npos) {
                 index_end_of_headers += 4;
 
                 regex rx("[^\r\n]+\r\n");
-                sregex_iterator formated_headers_list(client_message.begin(), client_message.begin() + index_end_of_headers, rx), rxend;
+                sregex_iterator formated_headers_list(client_message.begin() + index_start_of_headers, client_message.begin() + index_end_of_headers, rx), rxend;
 
                 while(formated_headers_list != rxend) {
                     string current_header = formated_headers_list->str();
@@ -62,6 +63,10 @@ namespace webserver {
 
                     string header_type = current_header.substr(0, index_end_of_header_type);
                     string header_value = current_header.substr(index_start_of_header_value);
+
+                    //remove "\r\n" from the end of header value
+                    header_value.pop_back();
+                    header_value.pop_back();
 
                     for (auto& current_char : header_type) {
                         current_char = tolower(current_char);

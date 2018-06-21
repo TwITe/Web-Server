@@ -59,7 +59,7 @@ namespace webserver {
 
         mx.unlock();
 
-        char read_buffer[32];
+        char read_buffer[64];
         ssize_t message_size;
         string received_message;
 
