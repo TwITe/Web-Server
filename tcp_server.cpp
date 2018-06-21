@@ -39,7 +39,7 @@ namespace webserver {
         take_requests();
     }
 
-    int tcp_server::find_client_index(shared_ptr<client> cl) {
+    int tcp_server::find_client_index(const shared_ptr<client>& cl) {
         for (unsigned int index = 0; index < clients.size(); index++) {
             if (clients[index].get_id() == cl->get_id()) {
                 return index;
@@ -49,7 +49,7 @@ namespace webserver {
         return -1;
     }
 
-    void tcp_server::connection_handler(shared_ptr<client> cl) {
+    void tcp_server::connection_handler(const shared_ptr<client>& cl) {
         // add client to the clients <vector>
         mx.lock();
 
