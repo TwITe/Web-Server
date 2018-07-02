@@ -73,7 +73,7 @@ namespace webserver {
 
         bool key_appeared = true;
 
-        for (const auto& current_line : raw_request_body) {
+        for (const auto& current_line : decoded_request_body) {
             for (const auto& current_char : current_line) {
                 if (current_char == parameters_delimiter) {
                     key_appeared = true;
