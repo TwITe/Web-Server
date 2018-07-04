@@ -1,30 +1,20 @@
-#include <regex>
-#include <iostream>
 #include "http_request_parser.h"
-#include "curl/curl.h"
 
 using namespace std;
 
 namespace webserver {
-    //split request body into vector of strings for ease of parsing of request body
+    //split request body into vector of strings for ease of request body parsing
     vector<string> http_request_parser::get_splitted_raw_request_body(const vector<string>& raw_request) {
         vector<string> raw_request_body;
         string body;
 
-        unsigned long index_start_of_body;
+        auto index_start_of_body = find(raw_request.begin(), raw_request.end(), "\r\n") + 1;
 
-        for (unsigned long current_request_line_number = 0; current_request_line_number < raw_request.size(); current_request_line_number++) {
-            if (raw_request[current_request_line_number] == "\r\n") {
-                index_start_of_body = current_request_line_number + 1;
-                break;
-            }
+        for (auto current_line = index_start_of_body; current_line != raw_request.end(); current_line++) {
+            body += *current_line;
         }
 
-        for (unsigned long current_request_line_number = index_start_of_body; current_request_line_number < raw_request.size(); current_request_line_number++) {
-            body += raw_request[current_request_line_number];
-        }
-
-        //add "\r\n" to the end for correct spliting the body
+        //add "\r\n" to the end of raw body to correct body splitting
         body += "\r\n";
 
         regex rx("[^\r\n]+\r\n");
@@ -39,30 +29,65 @@ namespace webserver {
         return raw_request_body;
     }
 
-    http_request_parser::content_type http_request_parser::parse_content_type_header(const string& raw_content_type_header) {
-        pair<string, map<string, string>> parsed_content_type_header = parameterized_header_parser.parse_parameterized_header(raw_content_type_header);
+    http_request_parser::content_type http_request_parser::parse_content_type_header
+            (const string& raw_content_type_header) {
+
+        pair<string, map<string, string>> parsed_content_type_header =
+                parameterized_header_parser.parse_parameterized_header(raw_content_type_header);
 
         content_type converted_header{parsed_content_type_header.first, parsed_content_type_header.second};
 
         return converted_header;
     }
 
-    http_request_parser::content_disposition http_request_parser::parse_content_disposition_header(const string& raw_content_disposition_header) {
-        pair<string, map<string, string>> parsed_content_disposition_header = parameterized_header_parser.parse_parameterized_header(raw_content_disposition_header);
+    http_request_parser::content_disposition http_request_parser::parse_content_disposition_header
+            (const string& raw_content_disposition_header) {
 
-        content_disposition converted_header{parsed_content_disposition_header.first, parsed_content_disposition_header.second};
+        pair<string, map<string, string>> parsed_content_disposition_header =
+                parameterized_header_parser.parse_parameterized_header(raw_content_disposition_header);
+
+        content_disposition converted_header{parsed_content_disposition_header.first,
+                                             parsed_content_disposition_header.second};
 
         return converted_header;
     }
 
-    void http_request_parser::parse_urlencoded_body(http_request &post_request, const vector<string> &raw_request_body) {
-        CURL* c = curl_easy_init();
+    string http_request_parser::unescape_string(const string& escaped_string) {
+        string unescaped_string;
 
-        vector<string> decoded_request_body;
+        unsigned int hexadecimal_char_length = 3;
+
+        for (unsigned long current_char_position = 0; current_char_position < escaped_string.size();) {
+            char current_char = escaped_string[current_char_position];
+
+            if (current_char == '+') {
+                unescaped_string.push_back(' ');
+
+                current_char_position++;
+            } else if (current_char == '%' &&
+                       escaped_string.size() - current_char_position >= hexadecimal_char_length) {
+                char unescaped_char = static_cast<char>(stoi("0x" + escaped_string.substr(current_char_position + 1, 2),
+                                                             nullptr, 16));
+                unescaped_string.push_back(unescaped_char);
+
+                current_char_position += hexadecimal_char_length;
+            } else {
+                unescaped_string.push_back(current_char);
+
+                current_char_position++;
+            }
+        }
+
+        return unescaped_string;
+    }
+
+    void http_request_parser::parse_urlencoded_body(http_request &post_request, const vector<string> &raw_request_body) {
+
+        vector<string> unescaped_request_body;
 
         for (auto& current_line : raw_request_body) {
-            char* decoded_body_part = curl_easy_unescape(c, current_line.c_str(), 0, 0);
-            decoded_request_body.emplace_back(string(decoded_body_part));
+            string unescaped_body_part = unescape_string(current_line);
+            unescaped_request_body.emplace_back(unescaped_body_part);
         }
 
         char parameters_delimiter = '&';
@@ -73,7 +98,7 @@ namespace webserver {
 
         bool key_appeared = true;
 
-        for (const auto& current_line : decoded_request_body) {
+        for (const auto& current_line : unescaped_request_body) {
             for (const auto& current_char : current_line) {
                 if (current_char == parameters_delimiter) {
                     key_appeared = true;
@@ -98,17 +123,21 @@ namespace webserver {
         post_request.add_request_body_field(key, value);
     }
 
+    bool http_request_parser::check_if_current_request_body_line_is_end_boundary
+            (const string& line, const string& boundary) {
 
-
-    bool http_request_parser::check_if_current_request_body_line_is_end_boundary(const string& line, const string& boundary) {
         return line.find("--" + boundary + "--") == 0;
     }
 
-    bool http_request_parser::check_if_current_request_body_line_is_boundary(const string& line, const string& boundary) {
+    bool http_request_parser::check_if_current_request_body_line_is_boundary
+            (const string& line, const string& boundary) {
+
         return line.find("--" + boundary) == 0;
     }
 
-    void http_request_parser::parse_formdata_body(http_request &post_request, const vector<string>& raw_request_body, const string& boundary) {
+    void http_request_parser::parse_formdata_body
+            (http_request &post_request, const vector<string>& raw_request_body, const string& boundary) {
+
         string key;
         string value;
 
@@ -119,13 +148,14 @@ namespace webserver {
 
             if (check_if_current_request_body_line_is_boundary(*current_line, boundary)) {
                 current_line++;
-                content_disposition current_body_subpart_content_disposition = parse_content_disposition_header(*current_line);
+                content_disposition current_body_subpart_content_disposition = parse_content_disposition_header(
+                        *current_line);
 
                 key = current_body_subpart_content_disposition.parameters["name"];
 
                 current_line++;
 
-                while(*current_line == "\r\n") {
+                while (*current_line == "\r\n") {
                     current_line++;
                 }
 
@@ -133,10 +163,10 @@ namespace webserver {
                 while (true) {
                     value += *current_line;
 
-                    if (current_line + 1 != raw_request_body.end() && !check_if_current_request_body_line_is_boundary(*(current_line + 1), boundary)) {
+                    if (current_line + 1 != raw_request_body.end() &&
+                        !check_if_current_request_body_line_is_boundary(*(current_line + 1), boundary)) {
                         current_line++;
-                    }
-                    else {
+                    } else {
                         break;
                     }
                 }
@@ -255,12 +285,15 @@ namespace webserver {
 
         unsigned int index_start_of_headers = 1;
 
-        //парсинг начинается со второй строчки, где и начинаются хэдеры
-        for (auto current_message_line = raw_http_request.begin() + index_start_of_headers; *current_message_line != headers_and_body_delimiter; current_message_line++) {
+        for (auto current_message_line = raw_http_request.begin() + index_start_of_headers;
+                *current_message_line != headers_and_body_delimiter; current_message_line++) {
+
             string current_header_type;
             string current_header_value;
 
-            for (size_t current_char_postion = 0; current_char_postion < current_message_line->size(); current_char_postion++) {
+            for (size_t current_char_postion = 0; current_char_postion < current_message_line->size();
+                    current_char_postion++) {
+
                 if ((*current_message_line)[current_char_postion] != header_type_and_value_delimiter) {
                     current_header_type.push_back((*current_message_line)[current_char_postion]);
                 }
