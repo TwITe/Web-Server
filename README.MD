@@ -68,11 +68,138 @@ server.start();
 Сервер предоставляет следующее API для работы с объектами типа **http_request**:
 
 1) **get_request_body()**
-Возвращает тело запроса в виде map<string, string>
+Возвращает тело запроса в виде **const map<string, string>&**
 
 Пример использования:
+```c++
+    webserver::http_request request;
+    const map<string, string>& requestBody = request.get_request_body();
 
+    for (auto currentField : requestBody) {
+        const string& key = currentField.first;
+        const string& value = currentField.second;
+        ...
+    }
 
+    return 0;
+```
+
+2) **get_request_params()**
+Возвращает query параметры в виде **const vector<request_param>&**
+
+Пример использования:
+```c++
+    webserver::http_request request;
+    const vector<webserver::request_param> requestParams = request.get_request_params();
+
+    for (auto currentParam : requestParams) {
+        const string& paramName = currentParam.name;
+        const string& paramValue = currentParam.value;
+        ...
+    }
+
+    return 0;
+```
+
+3) **get_headers()**
+Возвращаеты все хэдеры запроса в виде **const vector<http_header>&**
+
+Пример использования:
+```c++
+    webserver::http_request request;
+    const vector<webserver::http_header> requestHeaders = request.get_headers();
+
+    for (auto currentHeader : requestHeaders) {
+        const string& headerType = currentHeader.type;
+        const string& headerValue = currentHeader.value;
+        ...
+    }
+
+    return 0;
+```
+
+4) **get_header(header_name)**
+Принимает на вход тип запрашиваемого хэдера. В случае существования хэдера такого типа возвращает данный хэдер, иначе - возвращает пустой хэдер
+
+Пример использования:
+```c++
+    webserver::http_request request;
+    const webserver::http_header& requestHeader = request.get_header("Host");
+
+    const string& headerType = requestHeader.type;
+    const string& headerValue = requestHeader.value;
+    ...
+
+    return 0;
+```
+
+5) **get_request_url()**, **get_request_method()**, **get_request_http_version()**
+Данные методы возвращают полный *URL*, *Метод запроса*, *HTTP версию запроса* соответственно
+
+### Response
+Сервер предоставляет следующее API для работы с объектами типа **http_response**:
+
+1) **set_response_code(int code)**
+Метод принимает на вход код ответа типа *int* и устанавливает его
+
+Пример использования:
+```c++
+    webserver::http_response response;
+    response.set_response_code(200);
+    ...
+
+    return 0;
+```
+
+2) **void set_response_body(const string& response)**
+Метод принимает *string* представление тела ответа и устанавливает его
+
+Пример использования:
+```c++
+    webserver::http_response response;
+
+    const string responseBody = "Hello, World!";
+
+    response.set_response_body(responseBody);
+    ...
+
+    return 0;
+```
+
+3) **void set_response_length(unsigned long response_length)**
+Метод принимает на вход длину ответа типа *unsigned long* и устанавливает его
+
+Пример использования:
+```c++
+    webserver::http_response response;
+
+    const string responseBody = "Hello, World!";
+
+    response.set_response_length(responseBody.length());
+    ...
+
+    return 0;
+```
+
+4) **void set_response_headers(const vector<http_header>& http_headers)**
+Метод принимает на вход хэдеры вектор хэдеров типа *vector<http_header>* и устанавливает их
+
+Пример использования:
+```c++
+    webserver::http_response response;
+
+    webserver::http_header responseHeader;
+    responseHeader.type = "Content-Type";
+    responseHeader.value = "application/json";
+
+    vector<webserver::http_header> responseHeaders;
+    responseHeaders.emplace_back(responseHeader);
+
+    response.set_response_headers(responseHeaders);
+    ...
+
+    return 0;
+```
 
 ## Бенчмарки
 Сравнение данного веб сервера и стандартного HTTP 1.1 веб сервера языка Go.
