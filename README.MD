@@ -68,6 +68,7 @@ server.start();
 Сервер предоставляет следующее API для работы с объектами типа **http_request**:
 
 1) **const map<string, string>& get_request_body() const**
+
 Возвращает тело запроса в виде **const map<string, string>&**
 
 Пример использования:
@@ -85,6 +86,7 @@ server.start();
 ```
 
 2) **const vector<request_param> get_request_params() const**
+
 Возвращает query параметры в виде **const vector<request_param>&**
 
 Пример использования:
@@ -102,6 +104,7 @@ server.start();
 ```
 
 3) **const vector<http_header>& get_headers() const**
+
 Возвращаеты все хэдеры запроса в виде **const vector<http_header>&**
 
 Пример использования:
@@ -119,6 +122,7 @@ server.start();
 ```
 
 4) **const http_header get_header(const string& header_name) const**
+
 Принимает на вход тип запрашиваемого хэдера. В случае существования хэдера такого типа возвращает данный хэдер, иначе - возвращает пустой хэдер
 
 Пример использования:
@@ -134,12 +138,14 @@ server.start();
 ```
 
 5) **const string& get_request_url()**, **const string& get_request_method()**, **const string& get_request_http_version()**
+
 Данные методы возвращают полный *URL*, *Метод запроса*, *HTTP версию запроса* соответственно
 
 ### Response
 Сервер предоставляет следующее API для работы с объектами типа **http_response**:
 
 1) **void set_response_http_code(int code)**
+
 Метод принимает на вход HTTP код ответа типа *int* и устанавливает его
 
 Пример использования:
@@ -152,6 +158,7 @@ server.start();
 ```
 
 2) **void set_response_body(const string& response)**
+
 Метод принимает *string* представление тела ответа и устанавливает его
 
 Пример использования:
@@ -167,6 +174,7 @@ server.start();
 ```
 
 3) **void set_response_length(unsigned long response_length)**
+
 Метод принимает на вход длину ответа типа *unsigned long* и устанавливает его
 
 Пример использования:
@@ -182,6 +190,7 @@ server.start();
 ```
 
 4) **void set_response_headers(const vector<http_header>& http_headers)**
+
 Метод принимает на вход хэдеры вектор хэдеров типа *vector<http_header>* и устанавливает их
 
 Пример использования:
