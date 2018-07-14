@@ -24,7 +24,8 @@ vector<webserver::web_handler> handlers;
 **Создание обработчика:**
  - Создайте функцию, которая будет преобразовывать request в response
 ```c++
-    function<webserver::http_response(webserver::http_request)> index_handler = [&](webserver::http_request request) {
+    function<webserver::http_response(webserver::http_request)> index_handler =
+    [&](webserver::http_request request) {
         webserver::http_response response;
 
         string response_body = "Hello, World!";
@@ -139,7 +140,7 @@ server.start();
 
 5) **const string& get_request_url()**, **const string& get_request_method()**, **const string& get_request_http_version()**
 
-Данные методы возвращают полный *URL*, *Метод запроса*, *HTTP версию запроса* соответственно
+Данные методы возвращают *полный URL*, *Метод запроса*, *HTTP версию запроса* соответственно
 
 ### Response
 Сервер предоставляет следующее API для работы с объектами типа **http_response**:
