@@ -68,7 +68,7 @@ server.start();
 ### Request
 Сервер предоставляет следующее API для работы с объектами типа **http_request**:
 
-1) ```const map<string, string>& get_request_body() const```
+- ```const map<string, string>& get_request_body() const```
 
 Возвращает тело запроса в виде **const map<string, string>&**
 
@@ -86,7 +86,7 @@ server.start();
     return 0;
 ```
 
-2) ```const vector<request_param> get_request_params() const```
+- ```const vector<request_param> get_request_params() const```
 
 Возвращает query параметры в виде **const vector<request_param>&**
 
@@ -104,7 +104,7 @@ server.start();
     return 0;
 ```
 
-3) ```const vector<http_header>& get_headers() const```
+- ```const vector<http_header>& get_headers() const```
 
 Возвращаеты все хэдеры запроса в виде **const vector<http_header>&**
 
@@ -122,7 +122,7 @@ server.start();
     return 0;
 ```
 
-4) ```const http_header get_header(const string& header_name) const```
+- ```const http_header get_header(const string& header_name) const```
 
 Принимает на вход тип запрашиваемого хэдера. В случае существования хэдера такого типа возвращает данный хэдер, иначе - возвращает пустой хэдер
 
@@ -138,14 +138,14 @@ server.start();
     return 0;
 ```
 
-5) ```const string& get_request_url()```, ```const string& get_request_method()```, ```const string& get_request_http_version()```
+- ```const string& get_request_url()```, ```const string& get_request_method()```, ```const string& get_request_http_version()```
 
 Данные методы возвращают *полный URL*, *Метод запроса*, *HTTP версию запроса* соответственно
 
 ### Response
 Сервер предоставляет следующее API для работы с объектами типа **http_response**:
 
-1) ```void set_response_http_code(int code)```
+- ```void set_response_http_code(int code)```
 
 Метод принимает на вход HTTP код ответа типа *int* и устанавливает его
 
@@ -158,7 +158,7 @@ server.start();
     return 0;
 ```
 
-2) ```void set_response_body(const string& response)```
+- ```void set_response_body(const string& response)```
 
 Метод принимает *string* представление тела ответа и устанавливает его
 
@@ -174,7 +174,7 @@ server.start();
     return 0;
 ```
 
-3) ```void set_response_length(unsigned long response_length)```
+- ```void set_response_length(unsigned long response_length)```
 
 Метод принимает на вход длину ответа типа *unsigned long* и устанавливает его
 
@@ -190,7 +190,7 @@ server.start();
     return 0;
 ```
 
-4) ```void set_response_headers(const vector<http_header>& http_headers)```
+- ```void set_response_headers(const vector<http_header>& http_headers)```
 
 Метод принимает на вход хэдеры вектор хэдеров типа *vector<http_header>* и устанавливает их
 
