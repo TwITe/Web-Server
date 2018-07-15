@@ -77,7 +77,7 @@ namespace webserver {
 
                 //if body exists
                 if (!headers["content-length"].empty()) {
-                    long body_size = stol(headers["content-length"]);
+                    unsigned long body_size = stol(headers["content-length"]);
 
                     if (client_message.size() - index_end_of_headers != body_size) {
                         return false;
