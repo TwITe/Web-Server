@@ -1,5 +1,6 @@
-#include "web_server.h"
-#include "catch.hpp"
+#include "../web_server.h"
+#include "../catch.hpp"
+
 using namespace std;
 
 TEST_CASE("ParseHeaders_RawRequest_ParsedHeaders", "Parser") {
@@ -7,7 +8,8 @@ TEST_CASE("ParseHeaders_RawRequest_ParsedHeaders", "Parser") {
 
     raw_request.emplace_back("GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1\r\n");
     raw_request.emplace_back("Host: net.tutsplus.com\r\n");
-    raw_request.emplace_back("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)\r\n");
+    raw_request.emplace_back(
+            "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)\r\n");
     raw_request.emplace_back("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n");
     raw_request.emplace_back("\r\n");
 
@@ -17,7 +19,8 @@ TEST_CASE("ParseHeaders_RawRequest_ParsedHeaders", "Parser") {
 
     header = {"Host", "net.tutsplus.com"};
     proper_request.add_http_request_header(header);
-    header = {"User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)"};
+    header = {"User-Agent",
+              "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)"};
     proper_request.add_http_request_header(header);
     header = {"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"};
     proper_request.add_http_request_header(header);
@@ -28,9 +31,12 @@ TEST_CASE("ParseHeaders_RawRequest_ParsedHeaders", "Parser") {
     const vector<webserver::http_header>& proper_request_headers = proper_request.get_headers();
     const vector<webserver::http_header>& received_request_headers = received_request.get_headers();
 
-    for (unsigned long current_header_number = 0; current_header_number < proper_request_headers.size(); current_header_number++) {
-        REQUIRE(received_request_headers[current_header_number].type == proper_request_headers[current_header_number].type);
-        REQUIRE(received_request_headers[current_header_number].value == proper_request_headers[current_header_number].value);
+    for (unsigned long current_header_number = 0;
+         current_header_number < proper_request_headers.size(); current_header_number++) {
+        REQUIRE(received_request_headers[current_header_number].type ==
+                proper_request_headers[current_header_number].type);
+        REQUIRE(received_request_headers[current_header_number].value ==
+                proper_request_headers[current_header_number].value);
     }
 }
 
@@ -181,9 +187,12 @@ TEST_CASE("ParseRequestParameters_RawRequest_ParsedUrlParameters", "Parser") {
     const vector<webserver::request_param>& received_request_parameters = received_request.get_request_params();
     const vector<webserver::request_param>& proper_request_parameters = proper_request.get_request_params();
 
-    for (unsigned long current_request_parameter_number = 0; current_request_parameter_number < proper_request_parameters.size(); current_request_parameter_number++) {
-        REQUIRE(received_request_parameters[current_request_parameter_number].name == proper_request_parameters[current_request_parameter_number].name);
-        REQUIRE(received_request_parameters[current_request_parameter_number].value == proper_request_parameters[current_request_parameter_number].value);
+    for (unsigned long current_request_parameter_number = 0;
+         current_request_parameter_number < proper_request_parameters.size(); current_request_parameter_number++) {
+        REQUIRE(received_request_parameters[current_request_parameter_number].name ==
+                proper_request_parameters[current_request_parameter_number].name);
+        REQUIRE(received_request_parameters[current_request_parameter_number].value ==
+                proper_request_parameters[current_request_parameter_number].value);
     }
 }
 

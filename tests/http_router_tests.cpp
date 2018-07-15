@@ -1,5 +1,6 @@
-#include "web_server.h"
-#include "catch.hpp"
+#include "../web_server.h"
+#include "../catch.hpp"
+
 using namespace std;
 
 TEST_CASE("GetProperWebHandler_RequestPOSTW/oParametersW/Path_ReceivedPostRequestHandler", "HTTP Router") {
@@ -297,7 +298,8 @@ TEST_CASE("NonexistentProperWebHandler_RequestGETBadMethod_ReceiveErrorHandler",
     const string& received_web_handler_method = received_web_handler.get_web_handler_method();
     const string& received_web_handler_pattern = received_web_handler.get_web_handler_pattern();
 
-    const function<webserver::http_response(webserver::http_request)>& convert_request_to_response = received_web_handler.get_transform_to_response_function();
+    const function<webserver::http_response(
+            webserver::http_request)>& convert_request_to_response = received_web_handler.get_transform_to_response_function();
     webserver::http_response received_response = convert_request_to_response(test_request);
     const string& response_body = received_response.get_response_body();
 
@@ -343,7 +345,8 @@ TEST_CASE("NonexistentProperWebHandler_RequestGETBadPattern_ReceiveErrorHandler"
     const string& received_web_handler_method = received_web_handler.get_web_handler_method();
     const string& received_web_handler_pattern = received_web_handler.get_web_handler_pattern();
 
-    const function<webserver::http_response(webserver::http_request)>& convert_request_to_response = received_web_handler.get_transform_to_response_function();
+    const function<webserver::http_response(
+            webserver::http_request)>& convert_request_to_response = received_web_handler.get_transform_to_response_function();
     webserver::http_response received_response = convert_request_to_response(test_request);
     const string& response_body = received_response.get_response_body();
 

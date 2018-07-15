@@ -1,9 +1,10 @@
 #include <cpr/cpr.h>
 #include <iostream>
-#include "web_server.h"
+#include "../web_server.h"
 #include <vector>
 #include <thread>
-#include "catch.hpp"
+#include "../catch.hpp"
+
 using namespace cpr;
 
 const unsigned short int PORT = 8080;
@@ -11,7 +12,8 @@ unique_ptr<webserver::web_server> server;
 
 _Pragma("GCC diagnostic push")
 _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
-function<webserver::http_response(webserver::http_request)> transform_get_request = [&](webserver::http_request request) {
+function<webserver::http_response(webserver::http_request)> transform_get_request = [&](
+        webserver::http_request request) {
     webserver::http_response response;
 
     string response_body = "Hello, World!";
@@ -32,7 +34,8 @@ webserver::web_handler get_web_handler("/index_get", "GET", transform_get_reques
 
 _Pragma("GCC diagnostic push")
 _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
-function<webserver::http_response(webserver::http_request)> transform_post_request_reflect_message = [&](webserver::http_request request) {
+function<webserver::http_response(webserver::http_request)> transform_post_request_reflect_message = [&](
+        webserver::http_request request) {
     webserver::http_response response;
 
     const map<string, string>& request_body = request.get_request_body();
@@ -84,7 +87,7 @@ vector<webserver::web_handler> handlers{get_web_handler, post_reflect_web_handle
 TEST_CASE("Run server", "[Component Tests][Health Check Tests]") {
     server = make_unique<webserver::web_server>(PORT, handlers);
 
-    thread server_run = thread([&]{server->start();});
+    thread server_run = thread([&] { server->start(); });
     server_run.detach();
 
     while (Get(cpr::Url("http://localhost:8080/is_server_up")).error.code != cpr::ErrorCode::OK) {}
@@ -127,7 +130,8 @@ TEST_CASE("Payload Multiple parameters", "[Component Tests][UrlEncoded Post Test
     string expected_body_text = "say: Hi\r\n"
                                 "to: mom";
 
-    auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Payload{{"say", "Hi"}, {"to", "mom"}});
+    auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Payload{{"say", "Hi"},
+                                                                                                  {"to",  "mom"}});
 
     REQUIRE(received_response.text == expected_body_text);
     REQUIRE(received_response.status_code == 200);
@@ -150,7 +154,8 @@ TEST_CASE("Multipart Multiple Subparts", "[Component Tests][FormData Post Tests]
     string expected_body_text = "say: Hi\r\n"
                                 "to: mom";
 
-    auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Multipart{{"say", "Hi"}, {"to", "mom"}});
+    auto received_response = Post(cpr::Url{"http://localhost:8080/reflect_message"}, cpr::Multipart{{"say", "Hi"},
+                                                                                                    {"to",  "mom"}});
 
     REQUIRE(received_response.text == expected_body_text);
     REQUIRE(received_response.status_code == 200);
@@ -167,7 +172,7 @@ TEST_CASE("Shut Down The Server", "[Server Shutdown") {
 
     server = make_unique<webserver::web_server>(PORT, handlers);
 
-    thread server_run = thread([&]{server->start();});
+    thread server_run = thread([&] { server->start(); });
     server_run.detach();
 
     while (Get(cpr::Url("http://localhost:8080/is_server_up")).error.code != cpr::ErrorCode::OK) {}

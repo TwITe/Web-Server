@@ -16,13 +16,13 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
 #        catch main include
         provide_catch_main.cpp
 #        ------------------
-        http_request_parser_tests.cpp
-        http_parameterized_header_parser_tests.cpp
-        http_router_tests.cpp
+        tests/http_request_parser_tests.cpp
+        tests/http_parameterized_header_parser_tests.cpp
+        tests/http_router_tests.cpp
 #
 #        serverclient tests
 #        ------------------
-        web_server_component_tests.cpp
+        tests/web_server_component_tests.cpp
         )
 
 target_link_libraries(Web ${CPR_LIBRARIES})
