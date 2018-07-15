@@ -142,6 +142,18 @@ server.start();
 
 Данные методы возвращают *полный URL*, *Метод запроса*, *HTTP версию запроса* соответственно
 
+Пример использования:
+```c++
+    webserver::http_request request;
+
+    const string& requestUrl = request.get_request_url();
+    const string& requestMethod = request.get_request_method();
+    const string& requestHttpVersion = request.get_request_http_version();
+    ...
+
+    return 0;
+```
+
 ### Response
 Сервер предоставляет следующее API для работы с объектами типа **http_response**:
 
