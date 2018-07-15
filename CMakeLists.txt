@@ -3,7 +3,7 @@ project(Web)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread")
-add_subdirectory(cpr)
+add_subdirectory(tests/cpr)
 include_directories(${CPR_INCLUDE_DIRS})
 
 add_executable(Web web_server.h http_request.h http_header.h request_param.h
