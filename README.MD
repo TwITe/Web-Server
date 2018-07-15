@@ -145,7 +145,7 @@ server.start();
 ### Response
 Сервер предоставляет следующее API для работы с объектами типа **http_response**:
 
-1) **void set_response_http_code(int code)**
+1) ```c++void set_response_http_code(int code)```
 
 Метод принимает на вход HTTP код ответа типа *int* и устанавливает его
 
@@ -158,7 +158,7 @@ server.start();
     return 0;
 ```
 
-2) **void set_response_body(const string& response)**
+2) ```c++void set_response_body(const string& response)```
 
 Метод принимает *string* представление тела ответа и устанавливает его
 
