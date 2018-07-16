@@ -15,7 +15,7 @@ namespace webserver {
 
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(PORT);
-        server_address.sin_addr.s_addr = INADDR_ANY;
+        server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
         //For setsock opt (REUSEADDR)
         int reuse_port = 1;
@@ -66,7 +66,7 @@ namespace webserver {
         while (accept_connections) {
             memset(&read_buffer, 0, sizeof(read_buffer));
 
-            if ((message_size = recv(cl->sock, read_buffer, sizeof(read_buffer) - 1, 0)) > 0) {
+            if ((message_size = recv(cl->sock, read_buffer, sizeof(read_buffer) - 1, MSG_NOSIGNAL)) > 0) {
                 cout << "[Server] Client's message has been received" << endl;
                 cout << "[Server] Client's message: " << endl;
                 cout << "----------------------------" << endl;
@@ -83,7 +83,7 @@ namespace webserver {
                     cout << response_message << endl;
                     cout << "----------------------------" << endl << endl;
 
-                    if (send(cl->sock, response_message.c_str(), response_message.size(), 0) == -1) {
+                    if (send(cl->sock, response_message.c_str(), response_message.size(), MSG_NOSIGNAL) == -1) {
                         cerr << "[Server] Message sending to client with id " << cl->get_id() << " failed" << endl;
                         cerr << "============================" << endl << endl;
                     } else {
@@ -136,12 +136,10 @@ namespace webserver {
     void tcp_server::take_requests() {
         shared_ptr<client> current_client;
 
-        socklen_t cli_size = sizeof(sockaddr_in);
-
         while (accept_connections) {
             current_client = make_shared<client>();
 
-            current_client->sock = accept(listener_socket, (struct sockaddr*) &server_address, &cli_size);
+            current_client->sock = accept(listener_socket, nullptr, nullptr);
 
             if (current_client->sock != -1 && accept_connections) {
                 cout << "----------------------------" << endl << endl;

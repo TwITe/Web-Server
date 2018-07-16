@@ -22,7 +22,7 @@ using namespace std;
 namespace webserver {
     class tcp_server {
     private:
-        const unsigned int allowed_connections_number = 600000;
+        const unsigned int allowed_connections_number = 128;
 
         unsigned short int PORT;
 
