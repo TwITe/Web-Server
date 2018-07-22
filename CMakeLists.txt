@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 project(Web)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
 add_subdirectory(tests/cpr)
 include_directories(${CPR_INCLUDE_DIRS})
 
@@ -25,4 +25,4 @@ add_executable(Web web_server.h http_request.h http_header.h request_param.h
         tests/web_server_component_tests.cpp
         )
 
-target_link_libraries(Web ${CPR_LIBRARIES})
+target_link_libraries(Web ${CPR_LIBRARIES} pthread)
