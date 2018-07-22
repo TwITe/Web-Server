@@ -1,21 +1,23 @@
 #ifndef WEB_TCP_SERVER_H
 #define WEB_TCP_SERVER_H
 
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <iostream>
+#include "client.h"
 #include <cstring>
-#include <arpa/inet.h>
 #include <unistd.h>
 #include <string>
 #include <vector>
 #include <functional>
-#include <iostream>
 #include <thread>
 #include <mutex>
 #include <cerrno>
 #include <stdexcept>
-#include "client.h"
 #include <queue>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <sys/epoll.h>
 
 using namespace std;
 
@@ -24,11 +26,15 @@ namespace webserver {
     private:
         const unsigned int allowed_connections_number = 128;
 
+        const unsigned int MAX_EVENTS = 2048;
+
         unsigned short int PORT;
 
         int listener_socket;
 
-        volatile bool accept_connections;
+        int EPoll;
+
+        volatile bool accept_allow;
 
         struct sockaddr_in server_address{};
 
@@ -48,12 +54,18 @@ namespace webserver {
         void stop();
 
     private:
+        void set_nonblock(int sockfd);
+
         void connection_handler(const shared_ptr<client>& cl);
 
-        void take_requests();
+        void accept_connections();
 
-        int find_client_index(const shared_ptr<client>& cl);
+        void listen_events();
+
+        void set_client(shared_ptr<client>& cl);
+
+        int find_client_index(unsigned int client_id);
     };
 }
 
-#endif //WEB_TCP_SERVER_H
+#endif //WEB_TCP_SERVER_V2_H
