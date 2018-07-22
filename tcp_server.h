@@ -4,6 +4,7 @@
 #include <iostream>
 #include "client.h"
 #include <cstring>
+#include <unordered_set>
 #include <unistd.h>
 #include <string>
 #include <vector>
@@ -42,7 +43,9 @@ namespace webserver {
 
         const function<string(string)>& convert_client_message;
 
-        vector<client> clients;
+        unordered_set<int> socket_list;
+
+        unordered_set<int> closed_socket_list;
 
         mutex mx;
     public:
@@ -55,8 +58,6 @@ namespace webserver {
 
     private:
         void set_nonblock(int sockfd);
-
-        void connection_handler(const shared_ptr<client>& cl);
 
         void accept_connections();
 

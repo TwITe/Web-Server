@@ -1,7 +1,5 @@
 #include "tcp_server.h"
 
-// TODO: сделать single-threaded non-blocking I/O сервер, использущий epoll в режиме edge-triggered
-
 namespace webserver {
     tcp_server::tcp_server(unsigned short int PORT, const function<bool(string)>& is_full_message,
                            const function<string(string)>& convert_client_message) :
@@ -30,7 +28,6 @@ namespace webserver {
         if (bind(listener_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
             throw runtime_error("[Server] Binding failed");
         }
-        set_nonblock(listener_socket);
 
         if (listen(listener_socket, allowed_connections_number) == -1) {
             throw runtime_error("[Server] Listening failed");
@@ -42,38 +39,26 @@ namespace webserver {
 
         EPoll = epoll_create1(0);
 
-        thread accept_conns_thread(accept_connections);
+        thread accept_conns_thread(&tcp_server::accept_connections, this);
         accept_conns_thread.detach();
 
-        thread listen_events_thread(listen_events);
+        thread listen_events_thread(&tcp_server::listen_events, this);
         listen_events_thread.detach();
     }
 
-    int tcp_server::find_client_index(unsigned int client_id) {
-        for (unsigned int index = 0; index < clients.size(); index++) {
-            if (clients[index].get_id() == client_id) {
-                return index;
-            }
-        }
-
-        return -1;
-    }
-
     void tcp_server::set_client(shared_ptr<client>& cl) {
-        // TODO: выяснить, нужен ли тут mutex
-        cl->set_id(static_cast<int>(clients.size()));
+        cl->set_id(static_cast<int>(socket_list.size()));
 
-        mx.lock();
+        socket_list.insert(cl->get_id());
 
-        clients.push_back(*cl);
-
-        mx.unlock();
+        int sock = cl->sock;
+        int sock_id = cl->get_id();
 
         cout << "New client [ID " << cl->get_id() << "] has been added to the clients list" << endl << endl;
 
-        struct epoll_event client_event;
-        client_event.data.fd = cl->sock;
-        client_event.data.u32 = static_cast<uint32_t>(cl->get_id());
+        struct epoll_event client_event{};
+        client_event.data.fd = sock;
+        client_event.data.u32 = sock_id;
         client_event.events = EPOLLIN;
 
         epoll_ctl(EPoll, EPOLL_CTL_ADD, cl->sock, &client_event);
@@ -103,7 +88,7 @@ namespace webserver {
     }
 
     void tcp_server::listen_events() {
-        while (true) {
+        while (accept_allow) {
             struct epoll_event events[MAX_EVENTS];
             int active_events_num = epoll_wait(EPoll, events, MAX_EVENTS, -1);
             if (active_events_num == -1) {
@@ -111,13 +96,13 @@ namespace webserver {
             }
 
             for (int current_event = 0; current_event < active_events_num; current_event++) {
-                char readBuffer[1024];
-                memset(&readBuffer, '\0', sizeof(readBuffer));
+                char read_buffer[1024];
+                memset(&read_buffer, '\0', sizeof(read_buffer));
 
                 int current_socket = events[current_event].data.fd;
                 unsigned int current_socket_id = events[current_event].data.u32;
 
-                ssize_t recvSize = recv(current_socket, &readBuffer, sizeof(readBuffer) - 1, MSG_NOSIGNAL);
+                ssize_t recvSize = recv(current_socket, &read_buffer, sizeof(read_buffer) - 1, MSG_NOSIGNAL);
 
                 if (recvSize == 0) {
                     cout << "Client with id " << current_socket_id << " has been disconnected" << endl;
@@ -131,30 +116,16 @@ namespace webserver {
                         cerr << "Unable to close server side socket related to the client [ID " << current_socket_id <<
                              "]. Error message: " << strerror(errno) << endl;
                     }
-
-                    // TODO: придумать, как удалять сокеты из списка, не блокируя поток
-                    mx.lock();
-
-                    int client_index = find_client_index(current_socket_id);
-                    if (client_index != -1) {
-                        clients.erase(clients.begin() + client_index);
-                        cout << "Client [ID " << current_socket_id << "] has been removed from the clients vector" << endl;
-                    } else {
-                        cout << "Client was not found in the clients vector" << endl;
-                    }
-
-                    mx.unlock();
                 } else if (recvSize > 0) {
-                    char read_buffer[1024];
                     string received_message;
-
-                    cout << "[Server] Client's message has been received" << endl;
-                    cout << "[Server] Client's message: " << endl;
-                    cout << "----------------------------" << endl;
-                    cout << read_buffer << endl;
-                    cout << "----------------------------" << endl;
-
                     received_message.append(read_buffer, static_cast<unsigned long>(recvSize));
+                    memset(&read_buffer, '\0', sizeof(read_buffer));
+
+                    while ((recvSize = recv(current_socket, &read_buffer, sizeof(read_buffer) - 1, MSG_NOSIGNAL)) > 0 &&
+                           errno != EWOULDBLOCK) {
+                        received_message.append(read_buffer, static_cast<unsigned long>(recvSize));
+                        memset(&read_buffer, '\0', sizeof(read_buffer));
+                    }
 
                     if (is_full_message(received_message)) {
                         string response = convert_client_message(received_message);
@@ -165,10 +136,12 @@ namespace webserver {
                         cout << "----------------------------" << endl << endl;
 
                         if (send(current_socket, response.c_str(), response.size(), MSG_NOSIGNAL) != -1) {
-                            cout << "[Server] Message has been sent to client [ID " << current_socket_id << "]" << endl;
+                            cout << "[Server] Response has been sent to client [ID " <<
+                                 current_socket_id << "]" << endl;
                             cout << "============================" << endl << endl;
                         } else {
-                            cerr << "[Server] Message sending to client [ID " << current_socket_id << "] failed" << endl;
+                            cerr << "[Server] Response sending to client [ID " << current_socket_id << "] failed"
+                                 << endl;
                             cerr << "============================" << endl << endl;
                         }
 
@@ -195,13 +168,15 @@ namespace webserver {
         }
 
         mx.lock();
-        for (auto& cl : clients) {
-            // client disconnect
-            if (close(cl.sock) != -1) {
-                cout << "[Server Stop] Connection with client [ID " << cl.get_id() << "] has been closed" << endl;
-            } else {
-                cerr << "[Server Stop] Unable to close connection with client [ID " << cl.get_id()
-                     << "]. Error message: " << strerror(errno) << endl;
+        for (auto& current_sock : socket_list) {
+            if (closed_socket_list.find(current_sock) != closed_socket_list.end()) {
+                if (close(current_sock) != -1) {
+                    cout << "[Server Stop] Connection with client [ID " << current_sock << "] has been closed"
+                         << endl;
+                } else {
+                    cerr << "[Server Stop] Unable to close connection with client [ID " << current_sock
+                         << "]. Error message: " << strerror(errno) << endl;
+                }
             }
         }
         mx.unlock();
