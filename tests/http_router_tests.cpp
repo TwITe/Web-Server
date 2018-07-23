@@ -1,5 +1,5 @@
 #include "../web_server.h"
-#include "../catch.hpp"
+#include "./catch.hpp"
 
 using namespace std;
 
