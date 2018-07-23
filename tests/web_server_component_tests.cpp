@@ -163,6 +163,18 @@ TEST_CASE("Multipart Multiple Subparts", "[Component Tests][FormData Post Tests]
     REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
 }
 
+TEST_CASE("Send multiple messages", "[Component Tests]") {
+    std::string expected_body_text = "Hello, World!";
+    for (int request_num = 0; request_num < 1000; request_num++) {
+        auto received_response = Get(cpr::Url{"http://localhost:8080/index_get"});
+
+        REQUIRE(received_response.status_code == 200);
+        REQUIRE(received_response.text == expected_body_text);
+        REQUIRE(received_response.header["Content-Type"] == "text/plain");
+        REQUIRE(received_response.header["Content-Length"] == to_string(expected_body_text.length()));
+    }
+}
+
 TEST_CASE("Shut Down The Server", "[Server Shutdown") {
     server->stop();
 
