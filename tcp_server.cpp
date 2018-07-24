@@ -9,10 +9,9 @@ namespace webserver {
     }
 
     void tcp_server::start() {
-        memset(&server_address, 0, sizeof(server_address));
-
         listener_socket = socket(AF_INET, SOCK_STREAM, 0);
 
+        memset(&server_address, 0, sizeof(server_address));
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(PORT);
         server_address.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -21,16 +20,12 @@ namespace webserver {
         setsockopt(listener_socket, SOL_SOCKET, SO_REUSEADDR, &reuse_port, sizeof(reuse_port));
 
         if (bind(listener_socket, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
-            throw runtime_error("[Server] Binding failed");
+            throw runtime_error("Binding failed");
         }
 
-        if (listen(listener_socket, allowed_connections_number) == -1) {
-            throw runtime_error("[Server] Listening failed");
+        if (listen(listener_socket, ALLOWED_CONNS_NUM) == -1) {
+            throw runtime_error("Listening failed");
         }
-
-        cout << "[Server] Configuring was done" << endl;
-        cout << "[Server] Server was enabled" << endl;
-        cout << "[Server] Waiting for connections on port " << PORT << "..." << endl;
 
         for (unsigned int thread_num = 1; thread_num <= MAX_EPOLL_THREADS; thread_num++) {
             int EPoll = epoll_create1(0);
@@ -38,6 +33,10 @@ namespace webserver {
             thread listen_events_thread(&tcp_server::listen_events, this, EPoll, thread_num);
             listen_events_thread.detach();
         }
+
+        cout << "Configuring was done" << endl;
+        cout << "Server was enabled" << endl;
+        cout << "Waiting for connections on port " << PORT << "..." << endl;
 
         accept_connections();
     }
@@ -52,7 +51,7 @@ namespace webserver {
 
         epoll_event* client_event = new epoll_event;
         client_event->data.ptr = cl;
-        client_event->events = EPOLLIN | EPOLLEXCLUSIVE | EPOLLET;
+        client_event->events = EPOLLIN;
 
         int epoll_sock = epoll_socket_list[epoll_socket_num];
         if (epoll_ctl(epoll_sock, EPOLL_CTL_ADD, cl->sock, client_event) != -1) {
@@ -69,13 +68,13 @@ namespace webserver {
             int client_sock = accept4(listener_socket, nullptr, nullptr, SOCK_NONBLOCK);
 
             if (client_sock != -1 && accept_allow) {
-                cout << "[Server] New connection has been accepted" << endl;
+                cout << "New connection has been accepted" << endl;
                 set_client(client_sock);
             } else {
                 if (!accept_allow && strcmp(strerror(errno), "SUCCESS") == 0) {
-                    cerr << "[Server] Discard connection: Server is terminating" << endl;
+                    cerr << "Discard connection: Server is terminating" << endl;
                 } else {
-                    cerr << "[Server] Socket accept failure" << endl << strerror(errno) << endl;
+                    cerr << "Socket accept failure" << endl << strerror(errno) << endl;
                 }
             }
         }
@@ -119,7 +118,7 @@ namespace webserver {
                     received_message.append(read_buffer, static_cast<unsigned long>(recv_size));
                     memset(&read_buffer, '\0', sizeof(read_buffer));
 
-                    cout << "[Server] Client's message has been received:" << endl << read_buffer << endl;
+                    cout << "Client's message has been received:" << endl << read_buffer << endl;
 
                     while ((recv_size = recv(current_socket, &read_buffer, sizeof(read_buffer) - 1, MSG_NOSIGNAL)) >
                            0 &&
@@ -135,12 +134,12 @@ namespace webserver {
 //                    if (is_full_message(received_message)) {
                     string response = convert_client_message(received_message);
 
-                    cout << "[" << thread_num << "]" << "[Server] Server's response:" << endl << response << endl;
+                    cout << "[" << thread_num << "]" << "Server's response:" << endl << response << endl;
 
                     if (send(current_socket, response.c_str(), response.size(), MSG_NOSIGNAL) != -1) {
-                        cout << "[Server] Response has been sent to client [ID " << current_socket_id << "]" << endl;
+                        cout << "Response has been sent to client [ID " << current_socket_id << "]" << endl;
                     } else {
-                        cerr << "[Server] Response sending to client [ID " << current_socket_id << "] failed" << endl;
+                        cerr << "Response sending to client [ID " << current_socket_id << "] failed" << endl;
                     }
 //                    }
                 } else {

@@ -25,7 +25,7 @@ using namespace std;
 namespace webserver {
     class tcp_server {
     private:
-        const unsigned int allowed_connections_number = 512;
+        const unsigned int ALLOWED_CONNS_NUM = 512;
 
         const unsigned int MAX_EVENTS = 1000;
 
