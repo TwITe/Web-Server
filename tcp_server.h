@@ -35,15 +35,13 @@ namespace webserver {
 
         int listener_socket;
 
+        volatile bool accept_allow;
+
         unsigned long uid = 0;
 
         unsigned int epoll_socket_num = 0;
 
         vector<int> epoll_socket_list;
-
-        volatile bool accept_allow;
-
-        struct sockaddr_in server_address;
 
         const function<bool(string)>& is_full_message;
 

@@ -3,15 +3,14 @@
 namespace webserver {
     tcp_server::tcp_server(unsigned short int PORT, const function<bool(string)>& is_full_message,
                            const function<string(string)>& convert_client_message) :
-            PORT(PORT), is_full_message(is_full_message),
-            convert_client_message(convert_client_message) {
+            PORT(PORT), is_full_message(is_full_message), convert_client_message(convert_client_message) {
         accept_allow = true;
     }
 
     void tcp_server::start() {
         listener_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-        memset(&server_address, 0, sizeof(server_address));
+        struct sockaddr_in server_address{};
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(PORT);
         server_address.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -121,8 +120,7 @@ namespace webserver {
                     cout << "Client's message has been received:" << endl << read_buffer << endl;
 
                     while ((recv_size = recv(current_socket, &read_buffer, sizeof(read_buffer) - 1, MSG_NOSIGNAL)) >
-                           0 &&
-                           errno != EWOULDBLOCK) {
+                           0 && errno != EWOULDBLOCK) {
                         received_message.append(read_buffer, static_cast<unsigned long>(recv_size));
 
                         cout << "[Read Cycle Server] Client's message has been received:" << endl << read_buffer
