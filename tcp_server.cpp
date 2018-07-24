@@ -48,12 +48,12 @@ namespace webserver {
         cl->sock = client_sock;
         cl->set_id(uid);
 
-        epoll_event* client_event = new epoll_event;
-        client_event->data.ptr = cl;
-        client_event->events = EPOLLIN;
+        epoll_event client_event{};
+        client_event.data.ptr = cl;
+        client_event.events = EPOLLIN;
 
         int epoll_sock = epoll_socket_list[epoll_socket_num];
-        if (epoll_ctl(epoll_sock, EPOLL_CTL_ADD, cl->sock, client_event) != -1) {
+        if (epoll_ctl(epoll_sock, EPOLL_CTL_ADD, cl->sock, &client_event) != -1) {
             cout << "New client [ID " << cl->get_id() << "] has been added to the Epoll instance" << endl;
         } else {
             cerr << "Error while adding new client [ID " << cl->get_id() << "] to the Epoll instance" << endl;
@@ -129,7 +129,6 @@ namespace webserver {
                         memset(&read_buffer, '\0', sizeof(read_buffer));
                     }
 
-//                    if (is_full_message(received_message)) {
                     string response = convert_client_message(received_message);
 
                     cout << "[" << thread_num << "]" << "Server's response:" << endl << response << endl;
@@ -139,7 +138,6 @@ namespace webserver {
                     } else {
                         cerr << "Response sending to client [ID " << current_socket_id << "] failed" << endl;
                     }
-//                    }
                 } else {
                     cerr << "Error while receiving message from client [ID " << current_socket_id << "] " <<
                          "Error message: " << strerror(errno) << endl;
