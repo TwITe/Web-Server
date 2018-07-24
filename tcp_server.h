@@ -25,29 +25,29 @@ using namespace std;
 namespace webserver {
     class tcp_server {
     private:
-        const unsigned int allowed_connections_number = 128;
+        const unsigned int allowed_connections_number = 512;
 
-        const unsigned int MAX_EVENTS = 2048;
+        const unsigned int MAX_EVENTS = 1000;
+
+        const unsigned int MAX_EPOLL_THREADS = 16;
 
         unsigned short int PORT;
 
         int listener_socket;
 
-        int EPoll;
+        unsigned long uid = 0;
+
+        unsigned int epoll_socket_num = 0;
+
+        vector<int> epoll_socket_list;
 
         volatile bool accept_allow;
 
-        struct sockaddr_in server_address{};
+        struct sockaddr_in server_address;
 
         const function<bool(string)>& is_full_message;
 
         const function<string(string)>& convert_client_message;
-
-        unordered_set<int> socket_list;
-
-        unordered_set<int> closed_socket_list;
-
-        mutex mx;
     public:
         tcp_server(unsigned short int PORT, const function<bool(string)>& is_full_message,
                    const function<string(string)>& convert_client_message);
@@ -57,15 +57,11 @@ namespace webserver {
         void stop();
 
     private:
-        void set_nonblock(int sockfd);
+        void set_client(int client_sock);
 
         void accept_connections();
 
-        void listen_events();
-
-        void set_client(shared_ptr<client>& cl);
-
-        int find_client_index(unsigned int client_id);
+        void listen_events(int EPoll, int thread_num);
     };
 }
 
