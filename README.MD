@@ -294,8 +294,8 @@ Cравнение серверов будет производиться по т
 ### Сравнение C++ Multi-Thread и Epoll серверов
 
 Реализации TCP Серверов, которые сравнивались в данном бенчмарке:
-* [Multi-Thread Tcp Server](https://github.com/blinky-z/Web-Server/blob/master/TCP_Servers/multi_thread_tcp_server.cpp)
-* [Epoll Tcp Server](https://github.com/blinky-z/Web-Server/blob/master/TCP_Servers/epoll_tcp_server.cpp)
+* [Multi-Thread TCP Server](https://github.com/blinky-z/Web-Server/blob/master/TCP_Servers/multi_thread_tcp_server.cpp)
+* [Epoll TCP Server](https://github.com/blinky-z/Web-Server/blob/master/TCP_Servers/epoll_tcp_server.cpp)
 
 ### Тестирование с большим количеством клиентов
 
