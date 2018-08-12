@@ -50,7 +50,7 @@ namespace webserver {
 
         epoll_event client_event{};
         client_event.data.ptr = cl;
-        client_event.events = EPOLLIN;
+        client_event.events = EPOLLIN | EPOLLET;
 
         int epoll_sock = epoll_socket_list[epoll_socket_num];
         if (epoll_ctl(epoll_sock, EPOLL_CTL_ADD, cl->sock, &client_event) != -1) {
@@ -80,17 +80,16 @@ namespace webserver {
     }
 
     void tcp_server::listen_events(int EPoll, int thread_num) {
+        struct epoll_event events[MAX_EVENTS];
         while (accept_allow) {
-            struct epoll_event events[MAX_EVENTS];
             int active_events_num = epoll_wait(EPoll, events, MAX_EVENTS, -1);
             if (active_events_num == -1) {
-                cerr << "Error occurred while checking for an I/O events. Error message: "
-                     << strerror(errno) << endl;
+                cerr << "[Thread " << thread_num << "] " << "Error occurred while checking for an I/O events. "
+                                                            "Error message: " << strerror(errno) << endl;
             }
 
             for (int current_event = 0; current_event < active_events_num; current_event++) {
                 char read_buffer[1024];
-                memset(&read_buffer, '\0', sizeof(read_buffer));
 
                 client* client_data = static_cast<client*>(events[current_event].data.ptr);
 
@@ -115,23 +114,20 @@ namespace webserver {
                 } else if (recv_size > 0) {
                     string received_message;
                     received_message.append(read_buffer, static_cast<unsigned long>(recv_size));
-                    memset(&read_buffer, '\0', sizeof(read_buffer));
 
                     cout << "Client's message has been received:" << endl << read_buffer << endl;
 
-                    while ((recv_size = recv(current_socket, &read_buffer, sizeof(read_buffer) - 1, MSG_NOSIGNAL)) >
+                    while ((recv_size = recv(current_socket, &read_buffer, sizeof(read_buffer), MSG_NOSIGNAL)) >
                            0 && errno != EWOULDBLOCK) {
                         received_message.append(read_buffer, static_cast<unsigned long>(recv_size));
 
                         cout << "[Read Cycle Server] Client's message has been received:" << endl << read_buffer
                              << endl;
-
-                        memset(&read_buffer, '\0', sizeof(read_buffer));
                     }
 
                     string response = convert_client_message(received_message);
 
-                    cout << "[" << thread_num << "]" << "Server's response:" << endl << response << endl;
+                    cout << "[Thread " << thread_num << "]" << "Server's response:" << endl << response << endl;
 
                     if (send(current_socket, response.c_str(), response.size(), MSG_NOSIGNAL) != -1) {
                         cout << "Response has been sent to client [ID " << current_socket_id << "]" << endl;

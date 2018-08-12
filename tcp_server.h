@@ -27,9 +27,9 @@ namespace webserver {
     private:
         const unsigned int ALLOWED_CONNS_NUM = 512;
 
-        const unsigned int MAX_EVENTS = 1000;
+        const unsigned int MAX_EVENTS = 128;
 
-        const unsigned int MAX_EPOLL_THREADS = 16;
+        const unsigned int MAX_EPOLL_THREADS = 4;
 
         unsigned short int PORT;
 
