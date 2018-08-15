@@ -10,7 +10,7 @@
 ```
 mkdir ~/web_server
 cd ~/web_server
-git clone https://github.com/TwITe/Web-Server.git
+git clone https://github.com/blinky-z/Web-Server.git
 ```
 
 ## Запуск веб-сервера:
